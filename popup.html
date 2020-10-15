@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Note list</title>
+    <style>
+        .main {
+            box-sizing: border-box;
+            position: relative;
+            width: 300px;
+            max-height: 400px;
+            padding-bottom: 40px;
+        }
+
+        .button__box {
+            position: absolute;
+            bottom: 0;    
+            height: 30px;
+            text-align: center;
+        }
+
+        button {
+            height: 30px;
+            margin: 0 auto;
+            width: fit-content;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <p>your note list</p>
+        <div id="list__box"></div>
+        <div class="button__box">
+            <button id="dl_btn">download as Markdown</button>
+            <button id="clear_btn">clear</button>
+        </div>
+    </div>
+</body>
+<script src="popup.js"></script>
+
+</html>
