@@ -30,6 +30,7 @@ chrome.runtime.onInstalled.addListener(function () {
     chrome.contextMenus.create({
         id: 'switch',
         title: '关闭/开启 Collector',
+        contexts: ['all'],
     });
     chrome.contextMenus.onClicked.addListener(function (params) {
         console.log('params:', params, params.menuItemId)

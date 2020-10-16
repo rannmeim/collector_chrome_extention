@@ -4,8 +4,6 @@
 
 'use strict';
 
-console.log('chrome', chrome);
-
 const LINES = 'collector-lines';
 
 let list = document.getElementById('list__box');
@@ -21,31 +19,34 @@ document.getElementById('dl_btn').addEventListener('click', function (e) {
   a.click();
 })
 document.getElementById('clear_btn').addEventListener('click', function (e) {
-  console.log('clear!')
   chrome.storage.sync.set({ [LINES]: [] }, function () {
-    console.log('clear done')
-    list.innerHTML = '';
+    fetchNotes();
   });
 })
 
 function fetchNotes() {
   console.log('fetch notes')
-  // 获取Storage中的note
   chrome.storage.sync.get(LINES, function (data) {
     list.innerHTML = '';
-
     console.log('notes:', data[LINES])
 
-    data[LINES].forEach(line => {
+    if (!data[LINES].length) {
       let p = document.createElement('p');
-      p.innerText = line;
+      p.innerText = 'let\'s collect your first note!';
       list.appendChild(p);
-    })
+    } else {
+      data[LINES].forEach(line => {
+        let p = document.createElement('p');
+        p.innerText = line;
+        list.appendChild(p);
+      })
+    }
   });
 
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  console.log(sender)
   console.log(sender.tab ?
     "from a content script:" + sender.tab.url :
     "from the extension");
