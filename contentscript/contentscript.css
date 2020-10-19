@@ -1,0 +1,14 @@
+#collector__rangebox {
+    color: gray;
+    border: 1px solid lightblue;
+}
+.dot {
+    box-sizing: border-box;
+    display: inline-block;
+    background: red;
+    transform: translate(-50%, -50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    position: absolute;
+}

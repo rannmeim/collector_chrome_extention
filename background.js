@@ -12,7 +12,7 @@ const menus = {
 
 chrome.runtime.onInstalled.addListener(function () {
     console.log('oninstalled')
-    // initialize storage
+    // init storage
     chrome.storage.sync.get(LINES, function (data) {
         if (!Array.prototype.isPrototypeOf(data.lines)) {
             chrome.storage.sync.set({ [LINES]: [] })
@@ -27,11 +27,12 @@ chrome.runtime.onInstalled.addListener(function () {
         });       
     } 
 
-    chrome.contextMenus.create({
-        id: 'switch',
-        title: '关闭/开启 Collector',
-        contexts: ['all'],
-    });
+    // todo  根据storage中存储的设置参数渲染开启或关闭
+    // chrome.contextMenus.create({
+    //     id: 'switch',
+    //     title: '关闭 or 开启 Collector',
+    //     contexts: ['all'],
+    // });
     chrome.contextMenus.onClicked.addListener(function (params) {
         console.log('params:', params, params.menuItemId)
         chrome.tabs.create({ url: 'https://www.baidu.com/s?ie=utf-8&wd=' + encodeURI(params.selectionText) });

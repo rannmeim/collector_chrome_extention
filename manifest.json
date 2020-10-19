@@ -26,8 +26,8 @@
   },
   "content_scripts":[{
     "matches":["http://*/*","https://*/*"],
-    "js":["contentscript.js"],
-    "css": ["contentscript.css"]
+    "js":["lib/popper.min.js", "lib/tippy.umd.min.js", "contentscript/contentscript.js"],
+    "css": ["lib/tippy.css", "lib/tippy-theme-light-border.css", "lib/tippy-svg-arrow.css", "contentscript/contentscript.css"]
   }],
   "commands": {
     "_execute_browser_action": {
