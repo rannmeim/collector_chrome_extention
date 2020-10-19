@@ -30,10 +30,10 @@ function geneBasePoint(position, bgcolor = 'orange') {
     div.className = 'dot'
     div.style.left = position.x + document.documentElement.scrollLeft + 'px';
     div.style.top = position.y + document.documentElement.scrollTop + 'px';
-    // div.style.background = bgcolor;
-    div.style.opacity = 0;
+    div.style.background = bgcolor;
+    // div.style.opacity = 0;
     div.setAttribute('id', 'collector__funcbox__base');
-
+    console.log('div', div)
     document.getElementsByTagName('body')[0].appendChild(div)
     return div
 }
@@ -71,17 +71,28 @@ function geneFunctionBox(mouseupPosition, selection) {
     startChar.detach()
     endChar.detach()
 
+    // generate popover
+    // let popover = tippy(geneBasePoint(position), {
+    //     showOnCreate: true,
+    //     trigger: 'manual',
+    //     theme: 'tomato',
+    //     placement: 'top',
+    //     content: geneFuncBoxContent(),
+    //     allowHTML: true,
+    //     zIndex: 2147483647,
+    // });
+    // console.log(popover)
 
-    let popover = tippy(geneBasePoint(position), {
-        showOnCreate: true,
-        trigger: 'manual',
-        theme: 'tomato',
+    console.log($("#collector__funcbox__base"))
+    $("#collector__funcbox__base").popover({
+        container: 'body',
+        content: 'hi~~~~',
+        // html: true,
+        // content: geneFuncBoxContent(),
         placement: 'top',
-        content: geneFuncBoxContent(),
-        allowHTML: true,
-        zIndex: 2147483647,
-    });
-    console.log(popover)
+        // trigger: 'manual',
+    })
+    // $("#collector__funcbox__base").popover('show');
 
 
 
