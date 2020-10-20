@@ -5,10 +5,18 @@
 .dot {
     box-sizing: border-box;
     display: inline-block;
-    background: red;
-    transform: translate(-50%, -50%);
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
+    background: orange;
+    transform: translate(-50%, 0);
+    width: 4px;
     position: absolute;
+}
+.popover-body {
+    padding: 0;
+}
+.popover__btn {
+    margin: 0 6px;
+    font-size: 14px;
+}
+.popover {
+    z-index: 2147483647 !important;
 }

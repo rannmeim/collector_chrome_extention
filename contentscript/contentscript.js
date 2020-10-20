@@ -1,45 +1,68 @@
 const LINES = 'collector-lines';
-let fbox = null;
-let rangeBox = null;
+// let rangeBox = null; // 高亮框
+let $base = null;
+let mouseMoved = false;
 
 function geneFuncBoxContent() {
     const btns = ['添加到笔记', '搜索']
     let content = document.createElement('div');
+    content.style.padding = '6px 0px'
     btns.forEach(text => {
         let btn = document.createElement('button');
+        btn.setAttribute('type', 'btn');
+        btn.className = 'btn btn-outline-warning btn-sm popover__btn';
+
+        if (text === '添加到笔记') {
+            btn.addEventListener('click', handleAddBtnClick)
+        }
+        if (text === '搜索') {
+            btn.addEventListener('click', () => search())
+        }
         btn.innerText = text;
         content.appendChild(btn)
     })
-    console.log('content', content)
-    return content.innerHTML
+    content.addEventListener('click', (e) => {
+        e.stopPropagation();
+    })
+    return content
 }
 
-function saveSelection(selection) {
+function search(target = 'baidu') {
+    if (target === 'baidu') {
+        window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(document.getSelection().toString())}`,'_blank');
+    };
+    disposeFunctionBox();
+}
+
+function saveSelection() {
+    selection = document.getSelection().toString();
     chrome.storage.sync.get(LINES, function (data) {
-        chrome.storage.sync.set({ [LINES]: [...data[LINES], selection] }, function () {
-            chrome.runtime.sendMessage({ type: 'NOTES_UPDATED' }, function (response) {
-                console.log(response);
-            });
+        chrome.storage.sync.set({ [LINES]: [...data[LINES], selection + '\r\n'] }, function () {
+            // // 同步popup  todo 改为长连接
+            // chrome.runtime.sendMessage({ type: 'NOTES_UPDATED' }, function (response) {
+            //     console.log(response);
+            // });
         })
     });
+    disposeFunctionBox();
 }
 
-
-function geneBasePoint(position, bgcolor = 'orange') {
+function geneBaseLine(position, height) {
     let div = document.createElement('div')
     div.className = 'dot'
     div.style.left = position.x + document.documentElement.scrollLeft + 'px';
     div.style.top = position.y + document.documentElement.scrollTop + 'px';
-    div.style.background = bgcolor;
-    // div.style.opacity = 0;
+    div.style.height = height + 'px';
+    div.style.opacity = 0;
     div.setAttribute('id', 'collector__funcbox__base');
-    console.log('div', div)
     document.getElementsByTagName('body')[0].appendChild(div)
     return div
 }
 
 
 function geneFunctionBox(mouseupPosition, selection) {
+    disposeFunctionBox();
+
     let range = selection.getRangeAt(selection.rangeCount - 1);
     let startChar = document.createRange();
     let endChar = document.createRange();
@@ -47,6 +70,7 @@ function geneFunctionBox(mouseupPosition, selection) {
     let endRect = null;
     let forward = true;
     let position = null;
+    let height = 0;
 
     // generate posotion of the first char in the paragraph
     startChar.setStart(range.startContainer, range.startOffset);
@@ -57,21 +81,16 @@ function geneFunctionBox(mouseupPosition, selection) {
     endChar.setStart(range.endContainer, range.endOffset - 1);
     endChar.setEnd(range.endContainer, range.endOffset);
     endRect = endChar.getBoundingClientRect()
-
-    // console.log(range)
-    // console.log('startPos', startRect.x, startRect.y)
-    // console.log('endPos', endRect.right, endRect.top)
-    // console.log('mouseupPos', mouseupPosition.x, mouseupPosition.y)
-
     forward = Math.abs((mouseupPosition.x + mouseupPosition.y) - (startRect.x + startRect.y)) > Math.abs((mouseupPosition.x + mouseupPosition.y) - (endRect.right + endRect.top))
     position = forward ? { x: endRect.right, y: endRect.top } : { x: startRect.x, y: startRect.y }
+    height = Math.abs(endRect.bottom - startRect.y);
 
     // release range
     range.detach()
     startChar.detach()
     endChar.detach()
 
-    // generate popover
+    // generate popover by tippy
     // let popover = tippy(geneBasePoint(position), {
     //     showOnCreate: true,
     //     trigger: 'manual',
@@ -82,50 +101,62 @@ function geneFunctionBox(mouseupPosition, selection) {
     //     zIndex: 2147483647,
     // });
     // console.log(popover)
+    // todo destory
+    // popover.unmount();
 
-    console.log($("#collector__funcbox__base"))
-    $("#collector__funcbox__base").popover({
-        container: 'body',
-        content: 'hi~~~~',
-        // html: true,
-        // content: geneFuncBoxContent(),
+    //generate popover by bootstrap
+    geneBaseLine(position, height);
+    $base = $("#collector__funcbox__base")
+    $base.popover({
+        // container: 'body',
+        html: true,
+        content: geneFuncBoxContent(),
         placement: 'top',
-        // trigger: 'manual',
+        trigger: 'manual',
+        offset: 10,
     })
-    // $("#collector__funcbox__base").popover('show');
+    $base.popover('show');
+}
 
+function disposeFunctionBox() {
+    if ($base) {
+        $base.popover('dispose');
+        $base.remove();
+        $base = null;
+    }
+}
 
-
-    // saveSelection(selection.toString());
+function highlightSelection() {
+    console.log('hightlight', document.getSelection().toString())
 
     // rangeBox = document.createElement('span');
     // rangeBox.setAttribute('id', 'collector__rangebox');
     // range.surroundContents(rangeBox);
     // console.log(rangeBox)
+}
 
-
-    // todo destory
-    // popover.unmount();
-    // range.detach()
-    // startChar.detach()
-    // endChar.detach()
+function handleAddBtnClick() {
+    saveSelection();
+    highlightSelection();
 }
 
 document.addEventListener('mouseup', function (e) {
     let selection = document.getSelection();
-    console.log('mouseup', e, selection, 'tostring:', selection.toString());
-    if (selection.toString()) {
+    if (mouseMoved && selection.toString()) {
         geneFunctionBox(e, selection);
     }
 }, false);
 
-function delFunctionBox() {
-    console.log('del fbox!')
-
-}
-
 document.addEventListener('click', function (e) {
-    // console.log('client x,y:', e.clientX, e.clientY)
-    //     e.stopPropagation();
-    // delFunctionBox();
+    if (!mouseMoved) {
+        disposeFunctionBox();
+    }
+    mouseMoved = false;
+});
+
+document.addEventListener('mousedown', function (e) {
+    mouseMoved = false;
+}, false);
+document.addEventListener('mousemove', function (e) {
+    mouseMoved = true;
 }, false);

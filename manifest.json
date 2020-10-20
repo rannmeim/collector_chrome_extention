@@ -26,14 +26,14 @@
   },
   "content_scripts":[{
     "matches":["http://*/*","https://*/*"],
-    "js":["lib/jquery.min.js", "lib/popper.min.js", "lib/tippy.umd.min.js", "lib/bootstrap.min.js", "contentscript/contentscript.js"],
-    "css": ["lib/tippy.css", "lib/tippy-theme-light-border.css", "lib/tippy-svg-arrow.css", "lib/bootstrap.min.css", "contentscript/contentscript.css"]
+    "js":["lib/jquery.min.js", "lib/popper.min.js", "lib/bootstrap.min.js", "contentscript/contentscript.js"],
+    "css": ["lib/bootstrap.min.css", "contentscript/contentscript.css"]
   }],
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "default": "Alt+U",
-        "mac": "MacCtrl+U"
+        "default": "Ctrl+U",
+        "mac": "Command+U"
       },
       "description": "Opens note list"
     }

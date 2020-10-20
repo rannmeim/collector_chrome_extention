@@ -4,10 +4,10 @@ console.log('This is bg.js！！');
 
 const LINES = 'collector-lines';
 const menus = {
-    'google': '谷歌搜索',
+    // 'google': '谷歌搜索',
     'baidu': '百度搜索',
-    'segmentsefault': '思否搜索',
-    'google_tran': '谷歌翻译'
+    // 'segmentsefault': '思否搜索',
+    // 'google_tran': '谷歌翻译'
 }
 
 chrome.runtime.onInstalled.addListener(function () {

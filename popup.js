@@ -6,12 +6,13 @@
 
 const LINES = 'collector-lines';
 
-let list = document.getElementById('list__box');
+let notes = [];
 
 document.getElementById('dl_btn').addEventListener('click', function (e) {
-  console.log('download!')
-  // todo  p中的text 或storage中的字段  组织成markdown的形式
-  const blob = new Blob(['123123123'])
+  console.log('download!', 'notes', notes)
+  // todo 组织成markdown的形式
+  const blob = new Blob(notes)
+
   const blobUrl = window.URL.createObjectURL(blob)
   const a = document.createElement('a');
   a.setAttribute('download', 'notes.txt');
@@ -23,10 +24,22 @@ document.getElementById('clear_btn').addEventListener('click', function (e) {
     fetchNotes();
   });
 })
+document.getElementById('copy_btn').addEventListener('click', function (e) {
+  let textarea = document.createElement('textarea');
+  textarea.value = notes.join('');
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("Copy"); 
+  textarea.remove();
+
+})
 
 function fetchNotes() {
   console.log('fetch notes')
   chrome.storage.sync.get(LINES, function (data) {
+    let list = document.getElementById('list__box');
+    let btnBoxmain = document.getElementById('btn__box');
+    notes = data[LINES];
     list.innerHTML = '';
     console.log('notes:', data[LINES])
 
@@ -34,11 +47,14 @@ function fetchNotes() {
       let p = document.createElement('p');
       p.innerText = 'let\'s collect your first note!';
       list.appendChild(p);
+      btnBoxmain.style.display = 'none';
     } else {
+      btnBoxmain.style.display = 'block';
       data[LINES].forEach(line => {
-        let p = document.createElement('p');
-        p.innerText = line;
-        list.appendChild(p);
+        let li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerText = line;
+        list.appendChild(li);
       })
     }
   });
