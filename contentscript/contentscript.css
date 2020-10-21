@@ -9,6 +9,7 @@
     transform: translate(-50%, 0);
     width: 4px;
     position: absolute;
+    opacity: 0;
 }
 .popover-body {
     padding: 0;
@@ -19,4 +20,7 @@
 }
 .popover {
     z-index: 2147483647 !important;
+}
+.c__funcbox__content {
+    padding: 6px 0;
 }
