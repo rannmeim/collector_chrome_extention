@@ -1,21 +1,17 @@
 let mouseMoved = false;
 
-console.log(CollectorUtils, this, window)
-
-// 先触发mouseup 再click
 document.addEventListener('click', function (e) {
-    console.log('click')
+    console.log('page click')
     if (!mouseMoved) {
-        CollectorUtils.disposeFunctionBox();
+        CollectorPopoverUtils.disposePopoverBox();
     }
     mouseMoved = false;
 });
 document.addEventListener('mouseup', function (e) {
     let selection = document.getSelection();
-    console.log('mouse up', selection.toString())
+    // console.log('mouse up', selection.toString())
     if (selection.toString()) {
-        console.log('about to render:', selection.toString())
-        CollectorUtils.geneFunctionBox(e);
+        CollectorPopoverUtils.genePopoverBox(e, selection);
     }
 }, false);
 
@@ -26,11 +22,20 @@ document.addEventListener('mousemove', function (e) {
     mouseMoved = true;
 }, false);
 document.addEventListener('dblclick', function (e) {
-    console.log('double click')
+    // console.log('double click')
     let selection = document.getSelection();
     if (mouseMoved && selection.toString()) {
-        // console.log('about to render:', selection.toString())
-        CollectorUtils.geneFunctionBox(e);
+        CollectorPopoverUtils.genePopoverBox(e, selection);
     }
 
 }, false);
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    console.log('contentscript onmessage!')
+    console.log(sender)
+    console.log(sender.tab ?
+      "from a content script:" + sender.tab.url :
+        "from the extension");
+    console.log('request:', request)
+    sendResponse({ response: "got it" });
+  });

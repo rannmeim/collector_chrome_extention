@@ -9,7 +9,7 @@ const LINES = 'collector-lines';
 let notes = [];
 
 document.getElementById('dl_btn').addEventListener('click', function (e) {
-  console.log('download!', 'notes', notes)
+  // console.log('download!', 'notes', notes)
   // todo 组织成markdown的形式
   const blob = new Blob(notes)
 
@@ -29,19 +29,17 @@ document.getElementById('copy_btn').addEventListener('click', function (e) {
   textarea.value = notes.join('');
   document.body.appendChild(textarea);
   textarea.select();
-  document.execCommand("Copy"); 
+  document.execCommand("Copy");
   textarea.remove();
 
 })
 
 function fetchNotes() {
-  console.log('fetch notes')
   chrome.storage.sync.get(LINES, function (data) {
     let list = document.getElementById('list__box');
     let btnBoxmain = document.getElementById('btn__box');
     notes = data[LINES];
     list.innerHTML = '';
-    console.log('notes:', data[LINES])
 
     if (!data[LINES].length) {
       let p = document.createElement('p');
@@ -62,6 +60,7 @@ function fetchNotes() {
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  console.log('popup js onmessage!')
   console.log(sender)
   console.log(sender.tab ?
     "from a content script:" + sender.tab.url :

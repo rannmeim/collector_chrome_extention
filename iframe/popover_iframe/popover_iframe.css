@@ -1,0 +1,31 @@
+.dot {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    box-sizing: border-box;
+    background: orange;
+    transform: translate(-50%, 100%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    /* opacity: 0; */
+}
+.popover-body {
+    padding: 0;
+}
+.popover__btn {
+    margin: 0 6px;
+    font-size: 14px;
+}
+.popover {
+    z-index: 2147483647 !important;
+}
+.c__funcbox__content {
+    padding: 6px 0;
+}
+html {
+    height: 100%;
+}
+body {
+    background: none;
+}

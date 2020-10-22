@@ -25,9 +25,9 @@
     "persistent": false
   },
   "content_scripts":[{
-    "matches":["http://*/*","https://*/*"],
-    "js":["lib/jquery.min.js", "lib/popper.min.js", "lib/bootstrap.min.js","contentscript/gene_functionbox_utils.js", "contentscript/contentscript.js"],
-    "css": ["lib/bootstrap.min.css", "contentscript/contentscript.css"]
+    "matches":["*://*/*"],
+    "js":["contentscript/gene_popover_utils.js", "contentscript/contentscript.js"],
+    "css": ["contentscript/contentscript.css"]
   }],
   "commands": {
     "_execute_browser_action": {
@@ -37,5 +37,8 @@
       },
       "description": "Opens note list"
     }
-  }
+  },
+  "web_accessible_resources": [
+    "iframe/*"
+  ]
 }
