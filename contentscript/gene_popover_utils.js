@@ -19,11 +19,11 @@ const CollectorPopoverUtils = {
 
         // generate posotion of the first char in the paragraph
         startRange.setStart(range.startContainer, range.startOffset);
-        startRange.setEnd(range.startContainer, range.startOffset + 1);
+        startRange.setEnd(range.startContainer, range.startOffset + 1 > range.startContainer.length ? range.startContainer.length : range.startOffset + 1);
         startRect = startRange.getBoundingClientRect()
 
         // generate posotion of the last char in the paragraph
-        endRange.setStart(range.endContainer, range.endOffset - 1);
+        endRange.setStart(range.endContainer, range.endOffset > 0 ? range.endOffset - 1 : 0);
         endRange.setEnd(range.endContainer, range.endOffset);
         endRect = endRange.getBoundingClientRect()
         forward = Math.abs((mouseupPosition.x + mouseupPosition.y) - (startRect.x + startRect.y)) > Math.abs((mouseupPosition.x + mouseupPosition.y) - (endRect.right + endRect.top))
