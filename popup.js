@@ -23,6 +23,11 @@ document.getElementById('clear_btn').addEventListener('click', function (e) {
   chrome.storage.sync.set({ [LINES]: [] }, function () {
     fetchNotes();
   });
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'CLEAR' }, function (response) {
+          console.log('CLEAR response', response);
+      });
+  });
 })
 document.getElementById('copy_btn').addEventListener('click', function (e) {
   let textarea = document.createElement('textarea');
@@ -36,7 +41,7 @@ document.getElementById('copy_btn').addEventListener('click', function (e) {
 
 function fetchNotes() {
   chrome.storage.sync.get(LINES, function (data) {
-    let list = document.getElementById('list__box');
+    let list = document.getElementById('list');
     let btnBoxmain = document.getElementById('btn__box');
     notes = data[LINES];
     list.innerHTML = '';
@@ -61,7 +66,6 @@ function fetchNotes() {
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log('popup js onmessage!')
-  console.log(sender)
   console.log(sender.tab ?
     "from a content script:" + sender.tab.url :
     "from the extension");

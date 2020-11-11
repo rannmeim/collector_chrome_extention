@@ -26,8 +26,9 @@
   },
   "content_scripts":[{
     "matches":["*://*/*"],
-    "js":["contentscript/gene_popover_utils.js", "contentscript/contentscript.js"],
-    "css": ["contentscript/contentscript.css"]
+    "js":["lib/jquery.min.js", "lib/bootstrap.min.js", "contentscript/gene_popover_utils.js", "contentscript/contentscript.js"],
+    "css": ["lib/bootstrap.min.css", "contentscript/contentscript.css"],
+    "run_at": "document_start"
   }],
   "commands": {
     "_execute_browser_action": {
@@ -35,10 +36,15 @@
         "default": "Ctrl+U",
         "mac": "Command+U"
       },
-      "description": "Opens note list"
+      "description": "Opens note list."
+    },
+    "undo_last_one": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Z",
+        "mac": "Command+Shift+Z"
+      },
+      "description": "Dubble press to undo the last one."
     }
-  },
-  "web_accessible_resources": [
-    "iframe/*"
-  ]
+
+  }
 }

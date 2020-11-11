@@ -1,4 +1,64 @@
-#collector__rangebox {
+/* #collector__rangebox {
     color: gray;
     border: 1px solid lightblue;
+} */
+.my-toast {
+    position: fixed;
+    left: 50%;
+    top: 100px;
+    transform: translateX(-50%);
+    z-index: 2147483647 !important;
 }
+
+/* popover */
+.collector__popover {
+    display: inline-block;
+    position: fixed;
+    transform: translate(-50%, -100%);
+    width: fit-content;
+    height: fit-content;
+    z-index: 2147483647;
+}
+
+.collector__popover__content {
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    background: white;
+    width: fit-content;
+    height: 30px;
+    line-height: 30px;
+}
+
+.collector__popover__content::after {
+    content: "";
+    position: absolute;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-style: solid;
+    border-color: #c5c5c5;
+    border-width: 1px 0 0 1px;
+    transform-origin: center;
+}
+
+.collector__popover__content[c-placement^="top"]::after {
+    bottom: -4px;
+    left: calc(50% - 4px);
+    transform: rotate(-135deg);
+}
+
+.collector__popover__content[c-placement^="bottom"]::after {
+    top: -4px;
+    left: calc(50% - 4px);
+    transform: rotate(45deg);
+}
+
+.collector__popover__btn {
+    display: inline-block;
+    font-size: 14px;
+    margin: 0 5px;
+    color: #FFC107;
+    cursor: pointer;
+}
+/* END popover */

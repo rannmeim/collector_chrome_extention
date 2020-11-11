@@ -1,5 +1,7 @@
 let mouseMoved = false;
 
+CollectorPopoverUtils.init();
+
 document.addEventListener('click', function (e) {
     console.log('page click')
     if (!mouseMoved) {
@@ -9,7 +11,6 @@ document.addEventListener('click', function (e) {
 });
 document.addEventListener('mouseup', function (e) {
     let selection = document.getSelection();
-    // console.log('mouse up', selection.toString())
     if (selection.toString()) {
         CollectorPopoverUtils.genePopoverBox(e, selection);
     }
@@ -22,7 +23,6 @@ document.addEventListener('mousemove', function (e) {
     mouseMoved = true;
 }, false);
 document.addEventListener('dblclick', function (e) {
-    // console.log('double click')
     let selection = document.getSelection();
     if (mouseMoved && selection.toString()) {
         CollectorPopoverUtils.genePopoverBox(e, selection);
@@ -30,12 +30,21 @@ document.addEventListener('dblclick', function (e) {
 
 }, false);
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    console.log('contentscript onmessage!')
-    console.log(sender)
+
+chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
     console.log(sender.tab ?
       "from a content script:" + sender.tab.url :
-        "from the extension");
-    console.log('request:', request)
-    sendResponse({ response: "got it" });
-  });
+      "from the extension");
+    if (request.type === 'PRESS_AGAIN_TO_UNDO') {
+        let data = CollectorPopoverUtils.pressAgain()
+        sendResponse({ type: data.type });
+    }
+    if (request.type === 'UNDO') {
+        CollectorPopoverUtils.undoSave();
+        sendResponse({ response: "got it" });
+    }
+    if (request.type === 'CLEAR') {
+        CollectorPopoverUtils.clear();
+        sendResponse({ response: "got it" });
+    }
+});
