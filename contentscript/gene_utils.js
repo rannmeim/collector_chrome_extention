@@ -1,51 +1,11 @@
 // utils for 实现细节  contentscript for 业务逻辑
-const LINES = 'collector-lines';
-const NotesHandlers = {
-    _notes: [],
-    init() {
-        chrome.storage.sync.get(LINES, function (data) {
-            if (data[LINES]) {
-                this._notes = data[LINES];
-            }
-        });
-    },
-    getNotes() {
-        return [...this._notes]
-    },
-    isEmpty() {
-        return !this._notes.length
-    },
-    undoSave() {
-        if (!this.isEmpty()) {
-            this._notes = this._notes.slice(0, this._notes.length - 1);
-        }
-        chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
-            console.log('deleted!')
-        })
-        ToastUtils.showToast({ type: 'undo' });
-    },
-    save() {
-        selection = document.getSelection().toString().trim();
-        this._notes = [...this._notes, selection + '\r\n'];
-        chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
-            console.log('save selection')
-            // // 同步popup  todo 改为长连接
-            // chrome.runtime.sendMessage({ type: 'NOTES_UPDATED' }, function (response) {
-            //     console.log(response);
-            // });
-        })
-    },
-    clear() {
-        this._notes = [];
-    },
-}
 const CollectorPopoverUtils = {
     _baseLineRange: null,
-    // _notes: [],
     _$toast: null,
     _$popover: null,
     _offset: 10,
     genePopoverBox(mouseupPosition, selection) {
+        console.log('gene box')
         let range = selection.getRangeAt(selection.rangeCount - 1);
         let startRange = document.createRange();
         let endRange = document.createRange();
@@ -118,8 +78,8 @@ const CollectorPopoverUtils = {
         this._stopAdjustPosWhenScroll();
     },
     pressAgain() {
-        if (!NotesHandlers.isEmpty()) {
-        // if (this._notes.length) {
+        if (!NoteHandlers.isEmpty()) {
+            // if (this._notes.length) {
             ToastUtils.showToast({ type: 'again' });
             return { type: 'default' }
         } else {
@@ -132,7 +92,7 @@ const CollectorPopoverUtils = {
         this.disposePopoverBox();
     },
     _saveSelection() {
-        NotesHandlers.save();
+        NoteHandlers.save();
         this._highlightSelection();
     },
     _highlightSelection() {
@@ -144,7 +104,7 @@ const CollectorPopoverUtils = {
     },
     _handleSearch(target = 'baidu') {
         if (target === 'baidu') {
-            window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(document.getSelection().toString())}`, '_blank');
+            window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(document.getSelection().toString().trim())}`, '_blank');
         };
         this.disposePopoverBox();
     },
@@ -197,7 +157,45 @@ const ToastUtils = {
 }
 
 const SidebarUtils = {
-    _$siebar: null,
-    showSidebar(options) {
-    }
+    _$sidebar: null,
+    _shown: false,
+    _needUpdate: false,
+    needUpdate() {
+        this._needUpdate = true;
+    },
+    _showSidebar() {
+        if (this._needUpdate) {
+            console.log('recreate sidebar')
+            this._destroySidebar();
+        }
+        if (!this._$sidebar) {
+            let iframe = document.createElement('iframe')
+            iframe.src = chrome.runtime.getURL("iframe/sidebar_iframe/sidebar.html")
+            iframe.id = 'collector__sidebar'
+            iframe.className = 'collector__sidebar'
+            iframe.setAttribute('scrolling', 'no')
+            iframe.setAttribute('frameborder', '0')
+            document.body.appendChild(iframe)
+            this._$sidebar = $(iframe)
+        }
+        this._$sidebar.removeClass('collector__sidebar--hidden')
+        this._shown = true;
+    },
+    hideSidebar() {
+        if (this._$sidebar) {
+            this._$sidebar.addClass('collector__sidebar--hidden')
+        }
+        this._shown = false;
+    },
+    _destroySidebar() {
+        if (this._$sidebar) {
+            this._$sidebar.remove();
+        }
+        this._needUpdate = false;
+        this._shown = false;
+        this._$sidebar = null;
+    },
+    toggleSidebar() {
+        this._shown ? this.hideSidebar() : this._showSidebar();
+    },
 }

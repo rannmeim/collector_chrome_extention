@@ -69,11 +69,11 @@ chrome.runtime.onInstalled.addListener(function () {
     });
 
     chrome.browserAction.onClicked.addListener(function (tab) {
+        // alert('icon clicked')
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SIDEBAR' }, function (response) {
                 console.log('PRESS_AGAIN_TO_UNDO response', response);
                 if (response.type !== 'empty') {
-                    // !< setTimeout是Task >!
                     undoTimeout = setTimeout(() => {
                         if (undoTimeout) {
                             undoTimeout = null;
@@ -82,7 +82,5 @@ chrome.runtime.onInstalled.addListener(function () {
                 }
             });
         });
-        console.log(tab, 'browseraction clicked')
-        alert('icon clicked')
     });
 });

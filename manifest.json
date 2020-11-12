@@ -25,7 +25,7 @@
   },
   "content_scripts":[{
     "matches":["*://*/*"],
-    "js":["lib/jquery.min.js", "lib/bootstrap.min.js", "contentscript/gene_utils.js", "contentscript/contentscript.js"],
+    "js":["lib/jquery.min.js", "lib/bootstrap.min.js", "contentscript/note_handlers.js", "contentscript/gene_utils.js", "contentscript/contentscript.js"],
     "css": ["lib/bootstrap.min.css", "contentscript/contentscript.css"],
     "run_at": "document_start"
   }],
@@ -35,7 +35,7 @@
         "default": "Ctrl+U",
         "mac": "Command+U"
       },
-      "description": "Opens note list."
+      "description": "Open/close note list."
     },
     "undo_last_one": {
       "suggested_key": {
@@ -44,6 +44,9 @@
       },
       "description": "Dubble press to undo the last one."
     }
-
-  }
+  },
+  "web_accessible_resources": [
+    "iframe/*",
+    "contentscript/note_handlers.js"
+  ]
 }

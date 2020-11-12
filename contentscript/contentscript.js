@@ -1,17 +1,18 @@
 let mouseMoved = false;
 
-NotesHandlers.init();
+NoteHandlers.init();
 
 document.addEventListener('click', function (e) {
     console.log('page click')
     if (!mouseMoved) {
         CollectorPopoverUtils.disposePopoverBox();
     }
+    SidebarUtils.hideSidebar();
     mouseMoved = false;
 });
 document.addEventListener('mouseup', function (e) {
     let selection = document.getSelection();
-    if (selection.toString()) {
+    if (selection.toString().trim()) {
         CollectorPopoverUtils.genePopoverBox(e, selection);
     }
 }, false);
@@ -24,7 +25,7 @@ document.addEventListener('mousemove', function (e) {
 }, false);
 document.addEventListener('dblclick', function (e) {
     let selection = document.getSelection();
-    if (mouseMoved && selection.toString()) {
+    if (mouseMoved && selection.toString().trim()) {
         CollectorPopoverUtils.genePopoverBox(e, selection);
     }
 
@@ -41,14 +42,15 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
             sendResponse({ type: data.type });
             break;
         case 'UNDO':
-            NotesHandlers.undoSave();
+            NoteHandlers.undoSave();
             sendResponse({ response: "got it" });
             break;
         case 'CLEAR':
-            NotesHandlers.clear();
+            NoteHandlers.clear();
             sendResponse({ response: "got it" });
             break;
         case 'SHOW_SIDEBAR':
+            SidebarUtils.toggleSidebar();
             sendResponse({ response: "got it" });
             break;
         default:
