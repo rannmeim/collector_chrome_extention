@@ -1,8 +1,47 @@
 // utils for 实现细节  contentscript for 业务逻辑
 const LINES = 'collector-lines';
+const NotesHandlers = {
+    _notes: [],
+    init() {
+        chrome.storage.sync.get(LINES, function (data) {
+            if (data[LINES]) {
+                this._notes = data[LINES];
+            }
+        });
+    },
+    getNotes() {
+        return [...this._notes]
+    },
+    isEmpty() {
+        return !this._notes.length
+    },
+    undoSave() {
+        if (!this.isEmpty()) {
+            this._notes = this._notes.slice(0, this._notes.length - 1);
+        }
+        chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
+            console.log('deleted!')
+        })
+        ToastUtils.showToast({ type: 'undo' });
+    },
+    save() {
+        selection = document.getSelection().toString().trim();
+        this._notes = [...this._notes, selection + '\r\n'];
+        chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
+            console.log('save selection')
+            // // 同步popup  todo 改为长连接
+            // chrome.runtime.sendMessage({ type: 'NOTES_UPDATED' }, function (response) {
+            //     console.log(response);
+            // });
+        })
+    },
+    clear() {
+        this._notes = [];
+    },
+}
 const CollectorPopoverUtils = {
     _baseLineRange: null,
-    _notes: [],
+    // _notes: [],
     _$toast: null,
     _$popover: null,
     _offset: 10,
@@ -79,7 +118,8 @@ const CollectorPopoverUtils = {
         this._stopAdjustPosWhenScroll();
     },
     pressAgain() {
-        if (this._notes.length) {
+        if (!NotesHandlers.isEmpty()) {
+        // if (this._notes.length) {
             ToastUtils.showToast({ type: 'again' });
             return { type: 'default' }
         } else {
@@ -91,25 +131,8 @@ const CollectorPopoverUtils = {
         this.undoSave();
         this.disposePopoverBox();
     },
-    undoSave() {
-        if (this._notes.length) {
-            this._notes = this._notes.slice(0, this._notes.length - 1);
-        }
-        chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
-            console.log('deleted!')
-        })
-        ToastUtils.showToast({ type: 'undo' });
-    },
     _saveSelection() {
-        selection = document.getSelection().toString().trim();
-        this._notes = [...this._notes, selection + '\r\n'];
-        chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
-            console.log('save selection')
-            // // 同步popup  todo 改为长连接
-            // chrome.runtime.sendMessage({ type: 'NOTES_UPDATED' }, function (response) {
-            //     console.log(response);
-            // });
-        })
+        NotesHandlers.save();
         this._highlightSelection();
     },
     _highlightSelection() {
@@ -125,19 +148,8 @@ const CollectorPopoverUtils = {
         };
         this.disposePopoverBox();
     },
-    init() {
-        chrome.storage.sync.get(LINES, function (data) {
-            if (data[LINES]) {
-                this._notes = data[LINES];
-            }
-        });
-    },
-    clear() {
-        this._notes = [];
-    },
     _setPopoverPosition() {
         // todo set placement(top/bottom)
-
         // !< 每次根据baseLineRange的位置调整, 不用positon: absolute+scrollTop自动适应，因为页面内容位置可能会动态变化 >!
         let area = this._baseLineRange.getBoundingClientRect()
         this._$popover.css({ 'left': `${Math.round(area.left + (area.right - area.left) / 2)}px`, 'top': `${Math.round(area.top - this._offset)}px` })
@@ -181,5 +193,11 @@ const ToastUtils = {
             // reset when no new toast was created (hide is not trigged forcibly)
             if (toast === this._$toast) this._$toast = null;
         })
+    }
+}
+
+const SidebarUtils = {
+    _$siebar: null,
+    showSidebar(options) {
     }
 }

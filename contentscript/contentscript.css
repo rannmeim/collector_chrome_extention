@@ -22,11 +22,10 @@
 
 .collector__popover__content {
     border: 1px solid #c5c5c5;
-    border-radius: 4px;
+    border-radius: 12px;
     background: white;
     width: fit-content;
-    height: 30px;
-    line-height: 30px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 2px 3px 1px;
 }
 
 .collector__popover__content::after {
@@ -56,6 +55,8 @@
 
 .collector__popover__btn {
     display: inline-block;
+    height: 30px;
+    line-height: 30px;
     font-size: 14px;
     margin: 0 5px;
     color: #FFC107;

@@ -1,6 +1,6 @@
 let mouseMoved = false;
 
-CollectorPopoverUtils.init();
+NotesHandlers.init();
 
 document.addEventListener('click', function (e) {
     console.log('page click')
@@ -34,17 +34,24 @@ document.addEventListener('dblclick', function (e) {
 chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
     console.log(sender.tab ?
       "from a content script:" + sender.tab.url :
-      "from the extension");
-    if (request.type === 'PRESS_AGAIN_TO_UNDO') {
-        let data = CollectorPopoverUtils.pressAgain()
-        sendResponse({ type: data.type });
-    }
-    if (request.type === 'UNDO') {
-        CollectorPopoverUtils.undoSave();
-        sendResponse({ response: "got it" });
-    }
-    if (request.type === 'CLEAR') {
-        CollectorPopoverUtils.clear();
-        sendResponse({ response: "got it" });
+        "from the extension");
+    switch (request.type) {
+        case 'PRESS_AGAIN_TO_UNDO':
+            let data = CollectorPopoverUtils.pressAgain()
+            sendResponse({ type: data.type });
+            break;
+        case 'UNDO':
+            NotesHandlers.undoSave();
+            sendResponse({ response: "got it" });
+            break;
+        case 'CLEAR':
+            NotesHandlers.clear();
+            sendResponse({ response: "got it" });
+            break;
+        case 'SHOW_SIDEBAR':
+            sendResponse({ response: "got it" });
+            break;
+        default:
+            sendResponse({response: 'undefined action'})
     }
 });
