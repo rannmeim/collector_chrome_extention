@@ -1,9 +1,86 @@
 // utils for 实现细节  contentscript for 业务逻辑
-const CollectorPopoverUtils = {
+// Popover 类
+function Popover(options) {
+    // 没有base元素 则按position fix在屏幕上
+    if (this.base) {
+        this.base = options.base; // jquery element on which popover base
+    } else {
+        this.position = options.position;
+    }
+    this.popover = null;
+    this.offset = Number(options.offset) || 0;
+    this.placement = options.placement || 'top'; // placement: top,bottom
+    this.content = options.content;
+    return this // 便于链式调用
+}
+Popover.prototype.updatePosition = function (pos) {
+    let position = pos || this.position;
+    this.popover.css({ 'position': 'fixed', 'left': position.x + 'px', 'top': position.y + 'px' });
+}
+Popover.prototype.bindToBase = function () {
+    this.base.css('position', 'relative');
+    this.popover.css({ 'position': 'absolute', 'left': '50%' });
+    switch (this.placement) {
+        case 'top':
+            this.popover.css({ 'top': `-${this.offset}px` });
+            break;
+        case 'bottom':
+            this.popover.css({ 'bottom': `-${this.offset}px` });
+            break;
+    }
+    this.base.append(this.popover);
+}
+Popover.prototype.create = function () {
+    if (this.popover) this.popover.remove();
+    let popover = document.createElement('div');
+    popover.className = 'collector__popover collector__popover--hidden'
+    popover.setAttribute('c-placement', this.placement)
+    popover.appendChild(content)
+    this.popover = $(popover);
+
+    // handle position
+    if (this.base) {
+        this.bindToBase();
+    } else {
+        this.updatePosition();
+        $('body')[0].append(popover)
+    }
+
+    return this;
+}
+Popover.prototype.show = function () {
+    this.popover.removeClass('collector__popover--hidden');
+    return this;
+}
+Popover.prototype.hide = function () {
+    this.popover.addClass('collector__popover--hidden');
+    return this;
+}
+Popover.prototype.destroy = function () {
+    this.popover.remove();
+    this.popover = null;
+    return this;
+}
+
+// 单例模式
+const PopoverUtils = {
     _baseLineRange: null,
     _$toast: null,
     _$popover: null,
     _offset: 10,
+    _btns: [{
+        text: '文字',
+        onClick: this._handleUndo().bind(this),
+        children: [
+
+        ]
+    }, {
+        text: '搜索',
+        onClick: this._handleSearch().bind(this),
+        children: [
+
+        ]
+    }],
     genePopoverBox(mouseupPosition, selection) {
         console.log('gene box')
         let range = selection.getRangeAt(selection.rangeCount - 1);
@@ -35,6 +112,18 @@ const CollectorPopoverUtils = {
         this._genePopover();
         this._setPopoverPosition();
         this._startAdjustPosWhenScroll();
+    },
+    _genePopoverContent() {
+        let content = document.createElement('div');
+        content.className = 'collector__popover__content';
+        this.btns.forEach(item => {
+            let btn = document.createElement('span');
+            btn.className = 'collector__popover__btn';
+            btn.addEventListener('click', item.onClick)
+            btn.innerText = item.text;
+            content.appendChild(btn)
+        })
+        return $(content)
     },
     _genePopover() {
         const btns = ['撤销添加', '搜索']

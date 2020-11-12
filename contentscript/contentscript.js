@@ -5,7 +5,7 @@ NoteHandlers.init();
 document.addEventListener('click', function (e) {
     console.log('page click')
     if (!mouseMoved) {
-        CollectorPopoverUtils.disposePopoverBox();
+        PopoverUtils.disposePopoverBox();
     }
     SidebarUtils.hideSidebar();
     mouseMoved = false;
@@ -13,7 +13,7 @@ document.addEventListener('click', function (e) {
 document.addEventListener('mouseup', function (e) {
     let selection = document.getSelection();
     if (selection.toString().trim()) {
-        CollectorPopoverUtils.genePopoverBox(e, selection);
+        PopoverUtils.genePopoverBox(e, selection);
     }
 }, false);
 
@@ -26,7 +26,7 @@ document.addEventListener('mousemove', function (e) {
 document.addEventListener('dblclick', function (e) {
     let selection = document.getSelection();
     if (mouseMoved && selection.toString().trim()) {
-        CollectorPopoverUtils.genePopoverBox(e, selection);
+        PopoverUtils.genePopoverBox(e, selection);
     }
 
 }, false);
@@ -38,7 +38,7 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
         "from the extension");
     switch (request.type) {
         case 'PRESS_AGAIN_TO_UNDO':
-            let data = CollectorPopoverUtils.pressAgain()
+            let data = PopoverUtils.pressAgain()
             sendResponse({ type: data.type });
             break;
         case 'UNDO':
