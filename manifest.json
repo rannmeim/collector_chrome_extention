@@ -47,6 +47,7 @@
   },
   "web_accessible_resources": [
     "iframe/*",
-    "contentscript/note_handlers.js"
+    "contentscript/note_handlers.js",
+    "images/icons/*"
   ]
 }

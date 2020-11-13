@@ -78,39 +78,84 @@ const PopoverUtils = {
     _init() {
         this._btns = [{
             popoverObj: null,
-            text: '文字',
-            // icon: require(''),
-            // onClick: this._handleUndo().bind(this),
+            text: 'Md',
+            icon: chrome.runtime.getURL('images/icons/markdown.png'),
             children: [{
                 text: "#",
-                children: [{
+            icon: chrome.runtime.getURL('images/icons/title.png'),
+            children: [{
                     text: "1",
-                    onClick: () => { console.log('1 clicked') },
+                    icon: chrome.runtime.getURL('images/icons/h1.png'),
+                    onClick: () => { this._saveSelection('#1') },
                 }, {
                     text: "2",
-                    onClick: () => { console.log('2 clicked') },
+                    icon: chrome.runtime.getURL('images/icons/h2.png'),
+                    onClick: () => { this._saveSelection('#2') },
+                }, {
+                    text: "3",
+                    icon: chrome.runtime.getURL('images/icons/h3.png'),
+                    onClick: () => { this._saveSelection('#3') },
+                }, {
+                    text: "4",
+                    icon: chrome.runtime.getURL('images/icons/h4.png'),
+                    onClick: () => { this._saveSelection('#4') },
+                }, {
+                    text: "5",
+                    icon: chrome.runtime.getURL('images/icons/h5.png'),
+                    onClick: () => { this._saveSelection('#5') },
+                }, {
+                    text: "6",
+                    icon: chrome.runtime.getURL('images/icons/h6.png'),
+                    onClick: () => { this._saveSelection('#6') },
                 }]
+            }, {
+                text: "</>",
+                icon: chrome.runtime.getURL('images/icons/code.png'),
+                onClick: () => { this._saveSelection('code') },
+            }, {
+                text: "“”",
+                icon: chrome.runtime.getURL('images/icons/quote.png'),
+                onClick: () => { this._saveSelection('quote') },
+            }, {
+                text: "o-list",
+                icon: chrome.runtime.getURL('images/icons/order-list.png'),
+                onClick: () => { this._saveSelection('o-list') },
+            }, {
+                text: "u-list",
+                icon: chrome.runtime.getURL('images/icons/unorder-list.png'),
+                onClick: () => { this._saveSelection('u-list') },
+            }, {
+                text: "B",
+                icon: chrome.runtime.getURL('images/icons/bold.png'),
+                onClick: () => { this._saveSelection('bold') },
+            }, {
+                text: "I",
+                icon: chrome.runtime.getURL('images/icons/italic.png'),
+                onClick: () => { this._saveSelection('italic') },
             }]
         }, {
             text: '搜索',
-            // onClick: this._handleSearch().bind(this),
+            icon: chrome.runtime.getURL('images/icons/google.png'),
             children: [{
                 text: "谷歌",
                 onClick: () => this._handleSearch('google'),
             }, {
                 text: "百度",
+                icon: chrome.runtime.getURL('images/icons/baidu.png'),
                 onClick: () => this._handleSearch('baidu'),
             }, {
-                text: "思否",
-                onClick: () => this._handleSearch('segmentfault'),
-            }, {
                 text: "StackOver",
+                icon: chrome.runtime.getURL('images/icons/stackoverflow.png'),
                 onClick: () => this._handleSearch('stackover'),
             }]
+        }, {
+            text: "谷歌翻译",
+            icon: chrome.runtime.getURL('images/icons/googletranslate.png'),
+            onClick: () => this._handleSearch('stackover'),
         }]
     },
     genePopoverBox(mouseupPosition, selection) {
-        console.log('gene box')
+        // console.log('gene box')
         this._selectionText = selection.toString().trim();
         let range = selection.getRangeAt(selection.rangeCount - 1);
         let startRange = document.createRange();
@@ -139,9 +184,6 @@ const PopoverUtils = {
 
         this._geneAllPopovers();
 
-
-        // // auto save
-        // this._saveSelection();
         this._startAdjustPosWhenScroll();
     },
     _getBasePositon(placement = 'top') {
@@ -173,24 +215,30 @@ const PopoverUtils = {
         }).create();
     },
     _genePopoverContent(btns) {
-        console.log('gene popover content', btns)
+        // console.log('gene popover content', btns)
         let content = $('<div></div>');
         content.addClass('collector__popover__content')
         btns.forEach(options => {
-            console.log('create btn', options)
-            let btn = $('<span></span>');
+            // console.log('create btn', options)
+            let btn = $('<div></div>');
             btn.addClass('collector__popover__btn')
             if (options.onClick) {
                 btn.click(options.onClick)
             }
-            if (options.text) {
+            if (options.icon) {
+                console.log('icon', options.icon)
+                let img = $('<img/>');
+                console.log('img', img)
+                img.addClass('collector__popover__icon')
+                img.attr('src', options.icon);
+                btn.append(img)
+            } else {
                 btn.text(options.text);
             }
             if (options.children) {
                 // !< mouseover 事件在鼠标移动到选取的元素及其子元素上时触发 。
                 // !< mouseenter 事件只在鼠标移动到选取的元素上时触发。 >!
                 btn.mouseenter(() => {
-                    console.log('mouseover', btn)
                     if (!options.popoverObj) {
                         let content = this._genePopoverContent(options.children)
                         options.popoverObj = new Popover({
@@ -204,7 +252,7 @@ const PopoverUtils = {
                     }
                 })
                 btn.mouseleave(() => {
-                    console.log('mouseleave', btn) 
+                    // console.log('mouseleave', btn)
                     if (options.popoverObj) {
                         options.popoverObj.hide();
                     }
@@ -235,8 +283,8 @@ const PopoverUtils = {
         this.undoSave();
         this.disposePopoverBox();
     },
-    _saveSelection() {
-        NoteHandlers.save();
+    _saveSelection(type) {
+        NoteHandlers.save({ text: this._selectionText, type });
         this._highlightSelection();
     },
     _highlightSelection() {
@@ -247,7 +295,6 @@ const PopoverUtils = {
         // console.log(rangeBox)
     },
     _handleSearch(target = 'baidu') {
-        console.log('_sel', this._selectionText)
         if (target === 'baidu') {
             window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(this._selectionText)}`, '_blank');
         };
@@ -310,7 +357,7 @@ const SidebarUtils = {
     },
     _showSidebar() {
         if (this._needUpdate) {
-            console.log('recreate sidebar')
+            // console.log('recreate sidebar')
             this._destroySidebar();
         }
         if (!this._$sidebar) {

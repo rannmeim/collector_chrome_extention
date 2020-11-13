@@ -11,9 +11,10 @@ async function fetchNotes() {
         list.appendChild(p);
     } else {
         notes.forEach(line => {
+            console.log('line', line)
             let li = document.createElement('li');
             li.className = 'list-group-item';
-            li.innerText = line;
+            li.innerText = line.text;
             list.appendChild(li);
         })
     }

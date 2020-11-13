@@ -27,11 +27,12 @@ const NoteHandlers = {
         })
         ToastUtils.showToast({ type: 'undo' });
     },
-    save() {
-        selection = document.getSelection().toString().trim();
-        this._notes = [...this._notes, selection + '\r\n'];
+    save(content) {
+        // 此时document.getSelection.toString()为空
+        console.log('content', content)
+        this._notes = [...this._notes, content];
         chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
-            console.log('save selection')
+            // console.log('save selection')
             // // 同步popup  todo 改为长连接
             // chrome.runtime.sendMessage({ type: 'NOTES_UPDATED' }, function (response) {
             //     console.log(response);
