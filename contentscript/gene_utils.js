@@ -2,20 +2,23 @@
 // Popover 类
 function Popover(options) {
     // 没有base元素 则按position fix在屏幕上
-    if (this.base) {
+    if (options.base) {
         this.base = options.base; // jquery element on which popover base
     } else {
-        this.position = options.position;
+        this.position = options.position; // 箭头指向的位置
     }
     this.popover = null;
     this.offset = Number(options.offset) || 0;
     this.placement = options.placement || 'top'; // placement: top,bottom
-    this.content = options.content;
-    return this // 便于链式调用
+    this.content = options.content; // jquery element
+    return this
 }
-Popover.prototype.updatePosition = function (pos) {
-    let position = pos || this.position;
-    this.popover.css({ 'position': 'fixed', 'left': position.x + 'px', 'top': position.y + 'px' });
+Popover.prototype.updatePosition = function (pos) { // 当传入positon时可用
+    if (this.position) {
+        let position = pos || this.position;
+        this.popover.css({ 'position': 'fixed', 'left': position.x + 'px', 'top': position.y + 'px' });
+        return this // 便于链式调用
+    }
 }
 Popover.prototype.bindToBase = function () {
     this.base.css('position', 'relative');
@@ -29,21 +32,24 @@ Popover.prototype.bindToBase = function () {
             break;
     }
     this.base.append(this.popover);
+    return this
 }
 Popover.prototype.create = function () {
     if (this.popover) this.popover.remove();
-    let popover = document.createElement('div');
-    popover.className = 'collector__popover collector__popover--hidden'
-    popover.setAttribute('c-placement', this.placement)
-    popover.appendChild(content)
-    this.popover = $(popover);
+
+    let popover = $('<div></div>');
+    popover.addClass('collector__popover')
+    popover.attr('c-placement', this.placement)
+    popover.append(this.content)
+    this.popover = popover;
+    console.log('this.popover', this.popover)
 
     // handle position
     if (this.base) {
         this.bindToBase();
     } else {
         this.updatePosition();
-        $('body')[0].append(popover)
+        $('body').append(this.popover)
     }
 
     return this;
@@ -65,24 +71,47 @@ Popover.prototype.destroy = function () {
 // 单例模式
 const PopoverUtils = {
     _baseLineRange: null,
-    _$toast: null,
-    _$popover: null,
     _offset: 10,
-    _btns: [{
-        text: '文字',
-        onClick: this._handleUndo().bind(this),
-        children: [
-
-        ]
-    }, {
-        text: '搜索',
-        onClick: this._handleSearch().bind(this),
-        children: [
-
-        ]
-    }],
+    _basePopover: null,
+    _btns: null,
+    _selectionText: '',
+    _init() {
+        this._btns = [{
+            popoverObj: null,
+            text: '文字',
+            // icon: require(''),
+            // onClick: this._handleUndo().bind(this),
+            children: [{
+                text: "#",
+                children: [{
+                    text: "1",
+                    onClick: () => { console.log('1 clicked') },
+                }, {
+                    text: "2",
+                    onClick: () => { console.log('2 clicked') },
+                }]
+            }]
+        }, {
+            text: '搜索',
+            // onClick: this._handleSearch().bind(this),
+            children: [{
+                text: "谷歌",
+                onClick: () => this._handleSearch('google'),
+            }, {
+                text: "百度",
+                onClick: () => this._handleSearch('baidu'),
+            }, {
+                text: "思否",
+                onClick: () => this._handleSearch('segmentfault'),
+            }, {
+                text: "StackOver",
+                onClick: () => this._handleSearch('stackover'),
+            }]
+        }]
+    },
     genePopoverBox(mouseupPosition, selection) {
         console.log('gene box')
+        this._selectionText = selection.toString().trim();
         let range = selection.getRangeAt(selection.rangeCount - 1);
         let startRange = document.createRange();
         let endRange = document.createRange();
@@ -107,68 +136,94 @@ const PopoverUtils = {
 
         this._baseLineRange = forward ? endRange : startRange;
 
-        // auto save
-        this._saveSelection();
-        this._genePopover();
-        this._setPopoverPosition();
+
+        this._geneAllPopovers();
+
+
+        // // auto save
+        // this._saveSelection();
         this._startAdjustPosWhenScroll();
     },
-    _genePopoverContent() {
-        let content = document.createElement('div');
-        content.className = 'collector__popover__content';
-        this.btns.forEach(item => {
-            let btn = document.createElement('span');
-            btn.className = 'collector__popover__btn';
-            btn.addEventListener('click', item.onClick)
-            btn.innerText = item.text;
-            content.appendChild(btn)
-        })
-        return $(content)
+    _getBasePositon(placement = 'top') {
+        // !< 每次根据baseLineRange的位置调整, 不用positon: absolute+scrollTop自动适应，因为页面内容位置可能会动态变化 >!
+        let area = this._baseLineRange.getBoundingClientRect();
+        let position = {};
+        switch (placement) {
+            case 'top':
+                position.x = Math.round(area.left + (area.right - area.left) / 2);
+                position.y = Math.round(area.top);
+                break;
+            case 'bottom':
+                position.x = Math.round(area.left + (area.right - area.left) / 2);
+                position.y = Math.round(area.bottom);
+                break;
+        }
+        return position
     },
-    _genePopover() {
-        const btns = ['撤销添加', '搜索']
-        const stopedEvents = ['click', 'mouseup']
-        let popover = document.createElement('div');
-        popover.id = 'collector__popover'
-        popover.className = 'collector__popover'
-        let content = document.createElement('div');
-        content.className = 'collector__popover__content';
-        // c-placement: top,bottom
-        content.setAttribute('c-placement', 'top')
-        btns.forEach(text => {
-            let btn = document.createElement('span');
-            btn.className = 'collector__popover__btn';
-
-            if (text === '撤销添加') {
-                // !< 使用箭头函数 handleAddBtnClick的this指向geneFuncBoxContent >!
-                btn.addEventListener('click', () => this._handleUndo())
-                // !< 直接放入this.函数 则handleAddBtnClick的this指向该dom元素 >!
+    _geneAllPopovers() {
+        this._init();
+        let placement = 'top';
+        let content = this._genePopoverContent(this._btns);
+        let position = this._getBasePositon(placement);
+        this._basePopover = new Popover({
+            position,
+            offset: this._offset,
+            placement,
+            content,
+        }).create();
+    },
+    _genePopoverContent(btns) {
+        console.log('gene popover content', btns)
+        let content = $('<div></div>');
+        content.addClass('collector__popover__content')
+        btns.forEach(options => {
+            console.log('create btn', options)
+            let btn = $('<span></span>');
+            btn.addClass('collector__popover__btn')
+            if (options.onClick) {
+                btn.click(options.onClick)
             }
-            if (text === '搜索') {
-                btn.addEventListener('click', () => this._handleSearch())
+            if (options.text) {
+                btn.text(options.text);
             }
-            btn.innerText = text;
-            content.appendChild(btn)
+            if (options.children) {
+                // !< mouseover 事件在鼠标移动到选取的元素及其子元素上时触发 。
+                // !< mouseenter 事件只在鼠标移动到选取的元素上时触发。 >!
+                btn.mouseenter(() => {
+                    console.log('mouseover', btn)
+                    if (!options.popoverObj) {
+                        let content = this._genePopoverContent(options.children)
+                        options.popoverObj = new Popover({
+                            base: btn,
+                            content,
+                            placement: 'top',
+                            offset: 0,
+                        }).create();
+                    } else {
+                        options.popoverObj.show();
+                    }
+                })
+                btn.mouseleave(() => {
+                    console.log('mouseleave', btn) 
+                    if (options.popoverObj) {
+                        options.popoverObj.hide();
+                    }
+                })
+            }
+            content.append(btn)
         })
-        stopedEvents.forEach(event => {
-            content.addEventListener(event, (e) => {
-                e.stopPropagation();
-            })
-        })
-        popover.appendChild(content)
-        document.body.appendChild(popover)
-        this._$popover = $(popover);
+        return content
     },
     disposePopoverBox() {
-        if (this._$popover) {
-            this._$popover.remove();
+        if (this._basePopover) {
+            this._basePopover.destroy();
         }
+        this._basePopover = null;
         this._baseLineRange = null;
         this._stopAdjustPosWhenScroll();
     },
     pressAgain() {
         if (!NoteHandlers.isEmpty()) {
-            // if (this._notes.length) {
             ToastUtils.showToast({ type: 'again' });
             return { type: 'default' }
         } else {
@@ -192,22 +247,23 @@ const PopoverUtils = {
         // console.log(rangeBox)
     },
     _handleSearch(target = 'baidu') {
+        console.log('_sel', this._selectionText)
         if (target === 'baidu') {
-            window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(document.getSelection().toString().trim())}`, '_blank');
+            window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(this._selectionText)}`, '_blank');
         };
         this.disposePopoverBox();
     },
     _setPopoverPosition() {
         // todo set placement(top/bottom)
-        // !< 每次根据baseLineRange的位置调整, 不用positon: absolute+scrollTop自动适应，因为页面内容位置可能会动态变化 >!
-        let area = this._baseLineRange.getBoundingClientRect()
-        this._$popover.css({ 'left': `${Math.round(area.left + (area.right - area.left) / 2)}px`, 'top': `${Math.round(area.top - this._offset)}px` })
+        let position = this._getBasePositon('top')
+        this._basePopover.updatePosition(position)
     },
     _adjustPos: null, // 
     _setAdjustPosFunc() {
-        this._adjustPos = ((e) => {
+        // !< 箭头函数已经改变了this的指向（由词法作用域确定）不需要再bind(this) >!
+        this._adjustPos = () => {
             this._setPopoverPosition()
-        }).bind(this) // !< bind(this)会以「创建它时」传入的第一个参数作为this >!
+        }
         return this._adjustPos
     },
     _startAdjustPosWhenScroll() {
