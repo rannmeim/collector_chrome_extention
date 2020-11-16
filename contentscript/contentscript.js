@@ -45,8 +45,9 @@ chrome.runtime.onMessage.addListener(async function (request, sender, sendRespon
             NoteHandlers.undoSave();
             sendResponse({ response: "got it" });
             break;
-        case 'CLEAR':
-            NoteHandlers.clear();
+        case 'CLEARED':
+            NoteHandlers.init();
+            ToastUtils.showToast({ type: 'cleared' });
             sendResponse({ response: "got it" });
             break;
         case 'SHOW_SIDEBAR':

@@ -78,82 +78,102 @@ const PopoverUtils = {
         this._btns = [{
             popoverObj: null,
             text: 'Md',
-            icon: chrome.runtime.getURL('images/icons/markdown.png'),
+            title: 'Markdown',
+            icon: chrome.runtime.getURL('images/icons/note.png'),
             children: [{
                 text: "text",
+                title: 'Plain text', // html attribute: title
                 icon: chrome.runtime.getURL('images/icons/format-clear.png'),
                 onClick: () => { this._saveSelection('text') },
             }, {
                 text: "h",
+                title: 'Heading',
                 icon: chrome.runtime.getURL('images/icons/h.png'),
                 children: [{
                     text: "1",
+                    title: 'Level 1 heading',
                     icon: chrome.runtime.getURL('images/icons/h1.png'),
                     onClick: () => { this._saveSelection('h1') },
                 }, {
                     text: "2",
+                    title: 'Level 2 heading',
                     icon: chrome.runtime.getURL('images/icons/h2.png'),
                     onClick: () => { this._saveSelection('h2') },
                 }, {
                     text: "3",
+                    title: 'Level 3 heading',
                     icon: chrome.runtime.getURL('images/icons/h3.png'),
                     onClick: () => { this._saveSelection('h3') },
                 }, {
                     text: "4",
+                    title: 'Level 4 heading',
                     icon: chrome.runtime.getURL('images/icons/h4.png'),
                     onClick: () => { this._saveSelection('h4') },
                 }, {
                     text: "5",
+                    title: 'Level 5 heading',
                     icon: chrome.runtime.getURL('images/icons/h5.png'),
                     onClick: () => { this._saveSelection('h5') },
                 }, {
                     text: "6",
+                    title: 'Level 6 heading',
                     icon: chrome.runtime.getURL('images/icons/h6.png'),
                     onClick: () => { this._saveSelection('h6') },
                 }]
             }, {
                 text: "</>",
+                title: 'Code',
                 icon: chrome.runtime.getURL('images/icons/code.png'),
                 onClick: () => { this._saveSelection('code') },
             }, {
                 text: "“”",
+                title: 'Quote',
                 icon: chrome.runtime.getURL('images/icons/quote.png'),
                 onClick: () => { this._saveSelection('quote') },
             }, {
                 text: "o-list",
+                title: 'Ordered list',
                 icon: chrome.runtime.getURL('images/icons/o-list.png'),
                 onClick: () => { this._saveSelection('o-list') },
             }, {
                 text: "u-list",
+                title: 'Unordered list',
                 icon: chrome.runtime.getURL('images/icons/u-list.png'),
                 onClick: () => { this._saveSelection('u-list') },
             }, {
                 text: "B",
+                title: 'Bold',
                 icon: chrome.runtime.getURL('images/icons/bold.png'),
                 onClick: () => { this._saveSelection('bold') },
             }, {
                 text: "I",
+                title: 'Italic',
                 icon: chrome.runtime.getURL('images/icons/italic.png'),
                 onClick: () => { this._saveSelection('italic') },
             }]
         }, {
             text: '搜索',
+            title: 'Search',
             icon: chrome.runtime.getURL('images/icons/search.png'),
             children: [{
                 text: "谷歌",
+                title: 'Google',
                 icon: chrome.runtime.getURL('images/icons/google.png'),
                 onClick: () => this._handleSearch('google'),
             }, {
                 text: "百度",
+                title: 'Baidu',
                 icon: chrome.runtime.getURL('images/icons/baidu.png'),
                 onClick: () => this._handleSearch('baidu'),
             }, {
-                text: "StackOver",
+                text: "StackOverflow",
+                title: 'Stack Overflow',
                 icon: chrome.runtime.getURL('images/icons/stackoverflow.png'),
                 onClick: () => this._handleSearch('stackoverflow'),
             }]
         }, {
             text: "谷歌翻译",
+            title: 'Google translate',
             icon: chrome.runtime.getURL('images/icons/googletranslate.png'),
             onClick: () => this._handleSearch('stackoverflow'),
         }]
@@ -228,6 +248,9 @@ const PopoverUtils = {
             if (options.onClick) {
                 btn.click(options.onClick)
             }
+            if (options.title) {
+                btn.attr('title', options.title)
+            }
             if (options.icon) {
                 let img = $('<img/>');
                 img.addClass('collector__popover__icon')
@@ -278,6 +301,8 @@ const PopoverUtils = {
         this._stopAdjustPosWhenScroll();
     },
     pressAgain() {
+        console.log('NoteHandlers.getNotes()')
+        console.log(NoteHandlers.getNotes())
         if (!NoteHandlers.isEmpty()) {
             ToastUtils.showToast({ type: 'again' });
             return { type: 'default' }
@@ -293,6 +318,7 @@ const PopoverUtils = {
     _saveSelection(type) {
         NoteHandlers.save({ text: this._selectionText, type });
         this._highlightSelection();
+        this.disposePopoverBox();
     },
     _highlightSelection() {
         // todo
@@ -338,7 +364,7 @@ const PopoverUtils = {
 }
 
 const ToastUtils = {
-    _texts: { 'again': '再按一次删除最后一条', 'undo': '已删除', 'empty': '还没有笔记，快去添加吧~' },
+    _texts: { 'again': '再按一次删除最后一条', 'undo': '已删除', 'empty': '还没有笔记，快去添加吧~', 'cleared': '列表已清空' },
     _$toast: null, // one toast at a time
     _geneToastEle(id, text) {
         let div = document.createElement('div');

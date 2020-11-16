@@ -83,6 +83,7 @@
     top: 0;
     right: 0;
     z-index: 2147483647;
+    box-shadow: rgba(0, 0, 0, 0.4) -1px 3px 60px 0px;
 }
 .collector__sidebar--hidden {
     display: none;

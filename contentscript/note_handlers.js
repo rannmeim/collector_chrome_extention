@@ -1,12 +1,28 @@
 const LINES = 'collector-lines';
+const text2Md = {
+    h1: ['#', ''], // [prefix, suffix]
+    h2: ['##', ''],
+    h3: ['###', ''],
+    h4: ['####', ''],
+    h5: ['#####', ''],
+    h6: ['######', ''],
+    code: ['```\n', '\n```'],
+    // quote: ['> ', ''], // quote需要处理多个换行为一个换行
+    bold: ['**', '**'],
+    italic: ['*', '*'],
+}
+for (let i = 1; i < 7; i++) {
+    text2Md['h' + i] = '#'
+}
 const NoteHandlers = {
     _notes: [],
     init() {
         let promise = new Promise(function (resolve, reject) {
-            chrome.storage.sync.get(LINES, function (data) {
-                if (data[LINES]) {
-                    this._notes = data[LINES];
-                }
+            // !< 非箭头函数时，this指向window >!
+            chrome.storage.sync.get(LINES, (data) => {
+                console.log('init get', data[LINES])
+                console.log(this)
+                this._notes = data[LINES] ? data[LINES] : [];
                 resolve(this._notes)
             });
         }.bind(this))
@@ -27,9 +43,26 @@ const NoteHandlers = {
         })
         ToastUtils.showToast({ type: 'undo' });
     },
+    parseToMarkdown(type, note) {
+        console.log(note)
+        let fixs = text2Md[type];
+        if (fixs) {
+            return fixs[0] + note + fixs[1]
+        } else {
+            note = note.split(/\n/).filter(line => line && line.trim());
+            console.log(note)
+            switch (type) {
+                case 'o-list':
+                    return note.map(item => `- ${item}`).join('\n')
+                case 'u-list':
+                    return note.map((item, index) => `${index + 1}. ${item}`).join('\n')
+                case 'quote':
+                    return '> ' + note.join('\n')
+            }
+        }
+    },
     save(content) {
         // 此时document.getSelection.toString()为空
-        console.log('content', content)
         this._notes = [...this._notes, content];
         chrome.storage.sync.set({ [LINES]: [...this._notes] }, function () {
             // console.log('save selection')
@@ -41,6 +74,8 @@ const NoteHandlers = {
         SidebarUtils.needUpdate();
     },
     clear() {
-        this._notes = [];
+        chrome.storage.sync.set({ [LINES]: [] }, () => {
+            this._notes = [];
+        });
     },
 }
