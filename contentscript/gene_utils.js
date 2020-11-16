@@ -16,7 +16,7 @@ function Popover(options) {
 Popover.prototype.updatePosition = function (pos) { // 当传入positon时可用
     if (this.position) {
         let position = pos || this.position;
-        this.popover.css({ 'position': 'fixed', 'left': position.x + 'px', 'top': position.y + 'px' });
+        this.popover.css({ 'position': 'fixed', 'left': position.x + 'px', 'top': position.y + (this.placement === 'top' ? -this.offset : this.offset) + 'px' });
         return this // 便于链式调用
     }
 }
@@ -42,7 +42,6 @@ Popover.prototype.create = function () {
     popover.attr('c-placement', this.placement)
     popover.append(this.content)
     this.popover = popover;
-    console.log('this.popover', this.popover)
 
     // handle position
     if (this.base) {
@@ -81,32 +80,36 @@ const PopoverUtils = {
             text: 'Md',
             icon: chrome.runtime.getURL('images/icons/markdown.png'),
             children: [{
-                text: "#",
-            icon: chrome.runtime.getURL('images/icons/title.png'),
-            children: [{
+                text: "text",
+                icon: chrome.runtime.getURL('images/icons/format-clear.png'),
+                onClick: () => { this._saveSelection('text') },
+            }, {
+                text: "h",
+                icon: chrome.runtime.getURL('images/icons/h.png'),
+                children: [{
                     text: "1",
                     icon: chrome.runtime.getURL('images/icons/h1.png'),
-                    onClick: () => { this._saveSelection('#1') },
+                    onClick: () => { this._saveSelection('h1') },
                 }, {
                     text: "2",
                     icon: chrome.runtime.getURL('images/icons/h2.png'),
-                    onClick: () => { this._saveSelection('#2') },
+                    onClick: () => { this._saveSelection('h2') },
                 }, {
                     text: "3",
                     icon: chrome.runtime.getURL('images/icons/h3.png'),
-                    onClick: () => { this._saveSelection('#3') },
+                    onClick: () => { this._saveSelection('h3') },
                 }, {
                     text: "4",
                     icon: chrome.runtime.getURL('images/icons/h4.png'),
-                    onClick: () => { this._saveSelection('#4') },
+                    onClick: () => { this._saveSelection('h4') },
                 }, {
                     text: "5",
                     icon: chrome.runtime.getURL('images/icons/h5.png'),
-                    onClick: () => { this._saveSelection('#5') },
+                    onClick: () => { this._saveSelection('h5') },
                 }, {
                     text: "6",
                     icon: chrome.runtime.getURL('images/icons/h6.png'),
-                    onClick: () => { this._saveSelection('#6') },
+                    onClick: () => { this._saveSelection('h6') },
                 }]
             }, {
                 text: "</>",
@@ -118,11 +121,11 @@ const PopoverUtils = {
                 onClick: () => { this._saveSelection('quote') },
             }, {
                 text: "o-list",
-                icon: chrome.runtime.getURL('images/icons/order-list.png'),
+                icon: chrome.runtime.getURL('images/icons/o-list.png'),
                 onClick: () => { this._saveSelection('o-list') },
             }, {
                 text: "u-list",
-                icon: chrome.runtime.getURL('images/icons/unorder-list.png'),
+                icon: chrome.runtime.getURL('images/icons/u-list.png'),
                 onClick: () => { this._saveSelection('u-list') },
             }, {
                 text: "B",
@@ -135,9 +138,10 @@ const PopoverUtils = {
             }]
         }, {
             text: '搜索',
-            icon: chrome.runtime.getURL('images/icons/google.png'),
+            icon: chrome.runtime.getURL('images/icons/search.png'),
             children: [{
                 text: "谷歌",
+                icon: chrome.runtime.getURL('images/icons/google.png'),
                 onClick: () => this._handleSearch('google'),
             }, {
                 text: "百度",
@@ -146,12 +150,12 @@ const PopoverUtils = {
             }, {
                 text: "StackOver",
                 icon: chrome.runtime.getURL('images/icons/stackoverflow.png'),
-                onClick: () => this._handleSearch('stackover'),
+                onClick: () => this._handleSearch('stackoverflow'),
             }]
         }, {
             text: "谷歌翻译",
             icon: chrome.runtime.getURL('images/icons/googletranslate.png'),
-            onClick: () => this._handleSearch('stackover'),
+            onClick: () => this._handleSearch('stackoverflow'),
         }]
     },
     genePopoverBox(mouseupPosition, selection) {
@@ -215,20 +219,17 @@ const PopoverUtils = {
         }).create();
     },
     _genePopoverContent(btns) {
-        // console.log('gene popover content', btns)
+        const stopedEvents = ['click', 'mouseup']
         let content = $('<div></div>');
         content.addClass('collector__popover__content')
         btns.forEach(options => {
-            // console.log('create btn', options)
             let btn = $('<div></div>');
             btn.addClass('collector__popover__btn')
             if (options.onClick) {
                 btn.click(options.onClick)
             }
             if (options.icon) {
-                console.log('icon', options.icon)
                 let img = $('<img/>');
-                console.log('img', img)
                 img.addClass('collector__popover__icon')
                 img.attr('src', options.icon);
                 btn.append(img)
@@ -258,6 +259,12 @@ const PopoverUtils = {
                     }
                 })
             }
+
+            stopedEvents.forEach(event => {
+                content[event](e => {
+                    e.stopPropagation();
+                })
+            })
             content.append(btn)
         })
         return content
@@ -295,10 +302,18 @@ const PopoverUtils = {
         // console.log(rangeBox)
     },
     _handleSearch(target = 'baidu') {
-        if (target === 'baidu') {
-            window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(this._selectionText)}`, '_blank');
-        };
-        this.disposePopoverBox();
+        switch (target) {
+            case 'baidu':
+                window.open(`https://www.baidu.com/s?ie=utf-8&wd=${encodeURI(this._selectionText)}`, '_blank');
+                break;
+            case 'google':
+                window.open(`https://www.google.com/search?q=${encodeURI(this._selectionText)}&ie=UTF-8`, '_blank');
+                break;
+            case 'stackoverflow':
+                window.open(`https://stackoverflow.com/search?q=${encodeURI(this._selectionText)}`, '_blank');
+                break;
+        }
+        // this.disposePopoverBox();
     },
     _setPopoverPosition() {
         // todo set placement(top/bottom)

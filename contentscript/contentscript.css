@@ -24,7 +24,7 @@
     transform: translate(-50%, 0);
 }
 .collector__popover__icon {
-    height: 20px;
+    /* height: 18px; */
 }
 .collector__popover__content {
     white-space: nowrap;
@@ -32,7 +32,8 @@
     border-radius: 12px;
     background: white;
     width: fit-content;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 2px 3px 1px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0 2px 8px 1px;
+    padding: 0 3px;
 }
 
 .collector__popover__content::after {
