@@ -48,7 +48,7 @@ function geneList(notes) {
     // let notes = [{
     //     type: 'h1',
     //     text: 'hello'
-    // }]
+    // }] // dev
     let list = $('#list');
     list.html('');
     console.log(notes)
@@ -64,10 +64,10 @@ function geneList(notes) {
             li.addClass('list-group-item');
             let div = $('<div></div>')
             div.addClass('list__text')
-            div.html(line.text.replace(/\n/g, '<br/>'));
+            div.html(line.text.replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;'));
             let img = $('<img/>');
             img.addClass('list__icon')
-            // img.attr('src', `../../images/icons/${line.type}.png`);
+            // img.attr('src', `../../images/icons/${line.type}.png`); // dev
             img.attr('src', chrome.runtime.getURL(`images/icons/${line.type}.png`));
 
             li.append(img)

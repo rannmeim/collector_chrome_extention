@@ -10,9 +10,7 @@ const text2Md = {
     // quote: ['> ', ''], // quote需要处理多个换行为一个换行
     bold: ['**', '**'],
     italic: ['*', '*'],
-}
-for (let i = 1; i < 7; i++) {
-    text2Md['h' + i] = '#'
+    text: ['', ''],
 }
 const NoteHandlers = {
     _notes: [],

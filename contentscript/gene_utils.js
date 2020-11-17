@@ -11,6 +11,9 @@ function Popover(options) {
     this.offset = Number(options.offset) || 0;
     this.placement = options.placement || 'top'; // placement: top,bottom
     this.content = options.content; // jquery element
+    if (options.id) {
+        this.id = options.id;
+    }
     return this
 }
 Popover.prototype.updatePosition = function (pos) { // 当传入positon时可用
@@ -41,6 +44,9 @@ Popover.prototype.create = function () {
     popover.addClass('collector__popover')
     popover.attr('c-placement', this.placement)
     popover.append(this.content)
+    if (this.id) {
+        popover.attr('id', this.id)
+    }
     this.popover = popover;
 
     // handle position
@@ -72,11 +78,10 @@ const PopoverUtils = {
     _baseLineRange: null,
     _offset: 10,
     _basePopover: null,
-    _btns: null,
     _selectionText: '',
     _init() {
-        this._btns = [{
-            popoverObj: null,
+        let btns = [{
+            popoverObj: null, // 该btn负责的Popover对象（每个可生成popover的btn都会生成一个popoverObj
             text: 'Md',
             title: 'Markdown',
             icon: chrome.runtime.getURL('images/icons/note.png'),
@@ -177,6 +182,20 @@ const PopoverUtils = {
             icon: chrome.runtime.getURL('images/icons/googletranslate.png'),
             onClick: () => this._handleSearch('stackoverflow'),
         }]
+        let basePopover = {
+            children: btns,
+            popoverObj: null,
+        }
+        !function geneParent(popoverOption) {
+            if (popoverOption.children) {
+                popoverOption.children.forEach(item => {
+                    item._parent = popoverOption;
+                    geneParent(item);
+                })
+            }
+        }(basePopover)
+
+        this._basePopover = basePopover;
     },
     genePopoverBox(mouseupPosition, selection) {
         // console.log('gene box')
@@ -229,13 +248,14 @@ const PopoverUtils = {
     _geneAllPopovers() {
         this._init();
         let placement = 'top';
-        let content = this._genePopoverContent(this._btns);
+        let content = this._genePopoverContent(this._basePopover.children);
         let position = this._getBasePositon(placement);
-        this._basePopover = new Popover({
+        this._basePopover.popoverObj = new Popover({
             position,
             offset: this._offset,
             placement,
             content,
+            id: 'collector__popover--root'
         }).create();
     },
     _genePopoverContent(btns) {
@@ -263,6 +283,10 @@ const PopoverUtils = {
                 // !< mouseover 事件在鼠标移动到选取的元素及其子元素上时触发 。
                 // !< mouseenter 事件只在鼠标移动到选取的元素上时触发。 >!
                 btn.mouseenter(() => {
+                    // 隐藏其他同级popover
+                    options._parent.children.forEach(childOption => {
+                        if (childOption.popoverObj) childOption.popoverObj.hide();
+                    })
                     if (!options.popoverObj) {
                         let content = this._genePopoverContent(options.children)
                         options.popoverObj = new Popover({
@@ -273,12 +297,6 @@ const PopoverUtils = {
                         }).create();
                     } else {
                         options.popoverObj.show();
-                    }
-                })
-                btn.mouseleave(() => {
-                    // console.log('mouseleave', btn)
-                    if (options.popoverObj) {
-                        options.popoverObj.hide();
                     }
                 })
             }
@@ -293,8 +311,8 @@ const PopoverUtils = {
         return content
     },
     disposePopoverBox() {
-        if (this._basePopover) {
-            this._basePopover.destroy();
+        if (this._basePopover && this._basePopover.popoverObj) {
+            this._basePopover.popoverObj.destroy();
         }
         this._basePopover = null;
         this._baseLineRange = null;
