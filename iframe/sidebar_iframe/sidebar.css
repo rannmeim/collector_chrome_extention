@@ -21,13 +21,25 @@ h1 {
   display: inline-block;
   line-height: 18px;
   font-size: 14px;
-  vertical-align: middle;
+  /* vertical-align: middle; */
+  vertical-align: top;
+  margin-top: 3px;
 }
 
 .list__icon {
   height: 18px;
   margin-right: 8px;
   vertical-align: top;
+}
+
+.list__item {
+  /* display: flex;
+  align-items: center; */
+}
+
+.div-box{
+  height: calc(100% - 96px);
+  overflow-y: auto;
 }
 
 .icon {

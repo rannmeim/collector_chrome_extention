@@ -26,7 +26,7 @@
   "content_scripts":[{
     "matches":["*://*/*"],
     "js":["lib/jquery.min.js", "lib/bootstrap.min.js", "contentscript/note_handlers.js", "contentscript/gene_utils.js", "contentscript/contentscript.js"],
-    "css": ["lib/bootstrap.min.css", "contentscript/contentscript.css"],
+    "css": ["contentscript/contentscript.css"],
     "run_at": "document_start"
   }],
   "commands": {

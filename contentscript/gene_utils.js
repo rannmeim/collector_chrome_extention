@@ -88,7 +88,7 @@ const PopoverUtils = {
             children: [{
                 text: "text",
                 title: 'Plain text', // html attribute: title
-                icon: chrome.runtime.getURL('images/icons/format-clear.png'),
+                icon: chrome.runtime.getURL('images/icons/text.png'),
                 onClick: () => { this._saveSelection('text') },
             }, {
                 text: "h",

@@ -25,6 +25,7 @@
 }
 #collector__popover--root .collector__popover__icon {
     height: 18px;
+    vertical-align: middle;
 }
 #collector__popover--root .collector__popover__content {
     white-space: nowrap;

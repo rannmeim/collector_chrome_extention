@@ -61,7 +61,7 @@ function geneList(notes) {
         notes.forEach(line => {
             console.log('line', line)
             let li = $('<li></li>');
-            li.addClass('list-group-item');
+            li.addClass('list-group-item list__item');
             let div = $('<div></div>')
             div.addClass('list__text')
             div.html(line.text.replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;'));
