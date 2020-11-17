@@ -77,6 +77,7 @@ function geneList(notes) {
     }
 
 }
+// fixit 其他页面更新notes后 刷新notes
 
 async function init() {
     geneList(await NoteHandlers.init());

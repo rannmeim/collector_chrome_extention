@@ -357,7 +357,7 @@ const PopoverUtils = {
                 window.open(`https://stackoverflow.com/search?q=${encodeURI(this._selectionText)}`, '_blank');
                 break;
         }
-        // this.disposePopoverBox();
+        this.disposePopoverBox();
     },
     _translate(text) {
         let tl = 'zh-CN';
@@ -441,11 +441,13 @@ const SidebarUtils = {
         this._$sidebar.removeClass('collector__sidebar--hidden')
         this._shown = true;
     },
+    // todo add refresh func
     hideSidebar() {
-        if (this._$sidebar) {
-            this._$sidebar.addClass('collector__sidebar--hidden')
-        }
-        this._shown = false;
+        this._destroySidebar();
+        // if (this._$sidebar) {
+        //     this._$sidebar.addClass('collector__sidebar--hidden')
+        // }
+        // this._shown = false;
     },
     _destroySidebar() {
         if (this._$sidebar) {
