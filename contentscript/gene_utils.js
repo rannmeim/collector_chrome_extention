@@ -180,7 +180,7 @@ const PopoverUtils = {
             text: "谷歌翻译",
             title: 'Google translate',
             icon: chrome.runtime.getURL('images/icons/googletranslate.png'),
-            onClick: () => this._handleSearch('stackoverflow'),
+            onClick: () => this._translate(this._selectionText),
         }]
         let basePopover = {
             children: btns,
@@ -359,10 +359,19 @@ const PopoverUtils = {
         }
         // this.disposePopoverBox();
     },
+    _translate(text) {
+        let tl = 'zh-CN';
+        let sl = 'en'
+        if (/[\u4E00-\u9FFF]/.test(text)) {
+            tl = 'en';
+            sl = 'zh-CN'
+        }
+        window.open(`https://translate.google.cn/#view=home&op=translate&tl=${tl}&sl=${sl}&text=${encodeURI(text)}`, '_blank');
+    },
     _setPopoverPosition() {
         // todo set placement(top/bottom)
         let position = this._getBasePositon('top')
-        this._basePopover.updatePosition(position)
+        this._basePopover.popoverObj.updatePosition(position)
     },
     _adjustPos: null, // 
     _setAdjustPosFunc() {

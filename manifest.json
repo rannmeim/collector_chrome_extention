@@ -1,7 +1,7 @@
 {
   "name": "Collector - for develper",
   "description" : "Note collector extension for developer",
-  "version": "1.0",
+  "version": "0.3.0",
   "browser_action": {
     "default_icon": {
       "16": "images/icon-16.png",

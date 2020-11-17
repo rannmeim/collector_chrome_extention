@@ -24,7 +24,7 @@
     transform: translate(-50%, 0);
 }
 #collector__popover--root .collector__popover__icon {
-    /* height: 18px; */
+    height: 18px;
 }
 #collector__popover--root .collector__popover__content {
     white-space: nowrap;
@@ -32,7 +32,7 @@
     border-radius: 12px;
     background: white;
     height: fit-content;
-    /* width: fit-content; */
+    /* fit-content 在某些网页下 表现为塌缩状态 不起作用 */
     width: max-content;
     box-shadow: rgba(0, 0, 0, 0.3) 0 2px 8px 1px;
     padding: 0 3px;
