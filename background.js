@@ -39,50 +39,52 @@ chrome.runtime.onInstalled.addListener(function () {
         chrome.tabs.create({ url: 'https://www.baidu.com/s?ie=utf-8&wd=' + encodeURI(params.selectionText) });
     });
 
-    chrome.commands.onCommand.addListener(function (command) {
-        if (command === 'undo_last_one') {
-            // 防抖
-            if (undoTimeout) {
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, { type: 'UNDO' }, function (response) {
-                        console.log(response);
-                    });
-                });
-                clearTimeout(undoTimeout);
-                undoTimeout = null;
-            } else {
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, { type: 'PRESS_AGAIN_TO_UNDO' }, function (response) {
-                        console.log('PRESS_AGAIN_TO_UNDO response', response);
-                        if (response.type !== 'empty') {
-                            // !< setTimeout是Task >!
-                            undoTimeout = setTimeout(() => {
-                                if (undoTimeout) {
-                                    undoTimeout = null;
-                                }
-                            }, 1000)
-                        }
-                    });
-                });
-            }
-        }
-    });
 
-    chrome.browserAction.onClicked.addListener(function (tab) {
-        // alert('icon clicked')
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SIDEBAR' }, function (response) {
-                // if (response) {
+});
+
+chrome.browserAction.onClicked.addListener(function (tab) {
+    // alert('icon clicked')
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SIDEBAR' }, function (response) {
+            // if (response) {
+                console.log('PRESS_AGAIN_TO_UNDO response', response);
+                if (response.type !== 'empty') {
+                    undoTimeout = setTimeout(() => {
+                        if (undoTimeout) {
+                            undoTimeout = null;
+                        }
+                    }, 1000)
+                }
+            // }
+        });
+    });
+});
+
+chrome.commands.onCommand.addListener(function (command) {
+    if (command === 'undo_last_one') {
+        // 防抖
+        if (undoTimeout) {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, { type: 'UNDO' }, function (response) {
+                    console.log(response);
+                });
+            });
+            clearTimeout(undoTimeout);
+            undoTimeout = null;
+        } else {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, { type: 'PRESS_AGAIN_TO_UNDO' }, function (response) {
                     console.log('PRESS_AGAIN_TO_UNDO response', response);
                     if (response.type !== 'empty') {
+                        // !< setTimeout是Task >!
                         undoTimeout = setTimeout(() => {
                             if (undoTimeout) {
                                 undoTimeout = null;
                             }
                         }, 1000)
                     }
-                // }
+                });
             });
-        });
-    });
+        }
+    }
 });

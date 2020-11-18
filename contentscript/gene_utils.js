@@ -425,7 +425,7 @@ const SidebarUtils = {
     },
     _showSidebar() {
         if (this._needUpdate) {
-            // console.log('recreate sidebar')
+            console.log('recreate sidebar')
             this._destroySidebar();
         }
         if (!this._$sidebar) {

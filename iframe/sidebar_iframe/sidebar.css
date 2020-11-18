@@ -22,14 +22,19 @@ h1 {
   line-height: 18px;
   font-size: 14px;
   word-break: break-word;
-  /* vertical-align: middle; */
   vertical-align: top;
   margin-top: 4px;
 }
+.list__icon__box{
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+  margin-right: 8px;
+  vertical-align: top;
+}
 
 .list__icon {
-  height: 18px;
-  margin-right: 8px;
+  height: 100%;
   vertical-align: top;
 }
 
@@ -37,7 +42,7 @@ h1 {
   display: flex;
 }
 
-.div-box{
+.list-box{
   height: calc(100% - 96px);
   overflow-y: auto;
 }

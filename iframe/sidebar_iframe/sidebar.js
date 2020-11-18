@@ -59,23 +59,26 @@ function geneList(notes) {
         list.append(p)
     } else {
         notes.forEach(line => {
-            console.log('line', line)
+            // console.log('line', line)
             let li = $('<li></li>');
             li.addClass('list-group-item list__item');
             let div = $('<div></div>')
             div.addClass('list__text')
             div.html(line.text.replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;'));
+            // !< 加一层imgBox 提前声明尺寸  这样后面获取list-box的height()不会动态改变 >!
+            let imgBox = $('<div></div>')
+            imgBox.addClass('list__icon__box')
             let img = $('<img/>');
             img.addClass('list__icon')
-            // img.attr('src', `../../images/icons/${line.type}.png`); // dev
             img.attr('src', chrome.runtime.getURL(`images/icons/${line.type}.png`));
-
-            li.append(img)
+            imgBox.append(img)
+            li.append(imgBox)
             li.append(div)
             list.append(li)
         })
     }
-
+    // 滚动到最下方
+    $('#list-box').scrollTop(list.height() - $('#list-box').height())
 }
 // fixit 其他页面更新notes后 刷新notes
 
