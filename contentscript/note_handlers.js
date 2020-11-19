@@ -48,13 +48,11 @@ const NoteHandler = {
         })
     },
     parseToMarkdown(type, note) {
-        // console.log(note)
         let fixs = text2Md[type];
         if (fixs) {
             return fixs[0] + note + fixs[1]
         } else {
             note = note.split(/\n/).filter(line => line && line.trim());
-            // console.log(note)
             switch (type) {
                 case 'u-list':
                     return note.map(item => `- ${item}`).join('\n')

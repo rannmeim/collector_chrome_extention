@@ -79,6 +79,7 @@ const PopoverHandler = {
     _offset: 10,
     _basePopover: null,
     _selectionText: '',
+    _placement: 'top',
     _init() {
         let btns = [{
             popoverObj: null, // 该btn负责的Popover对象（每个可生成popover的btn都会生成一个popoverObj
@@ -221,9 +222,8 @@ const PopoverHandler = {
 
         // culculate direction: forward or not 
         forward = Math.abs((mouseupPosition.x + mouseupPosition.y) - (startRect.x + startRect.y)) > Math.abs((mouseupPosition.x + mouseupPosition.y) - (endRect.right + endRect.top))
-
+        this._placement = forward ? 'bottom' : 'top';
         this._baseLineRange = forward ? endRange : startRange;
-
 
         this._geneAllPopovers();
 
@@ -247,13 +247,12 @@ const PopoverHandler = {
     },
     _geneAllPopovers() {
         this._init();
-        let placement = 'top';
         let content = this._genePopoverContent(this._basePopover.children);
-        let position = this._getBasePositon(placement);
+        let position = this._getBasePositon(this._placement);
         this._basePopover.popoverObj = new Popover({
             position,
             offset: this._offset,
-            placement,
+            placement: this._placement,
             content,
             id: 'collector__popover--root'
         }).create();
@@ -292,7 +291,7 @@ const PopoverHandler = {
                         options.popoverObj = new Popover({
                             base: btn,
                             content,
-                            placement: 'top',
+                            placement: this._placement,
                             offset: 0,
                         }).create();
                     } else {
