@@ -20,7 +20,7 @@ document.getElementById('dl_btn').addEventListener('click', function (e) {
   a.click();
 })
 document.getElementById('clear_btn').addEventListener('click', function (e) {
-  chrome.storage.sync.set({ [LINES]: [] }, function () {
+  chrome.storage.local.set({ [LINES]: [] }, function () {
     fetchNotes();
   });
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -40,7 +40,7 @@ document.getElementById('copy_btn').addEventListener('click', function (e) {
 })
 
 function fetchNotes() {
-  chrome.storage.sync.get(LINES, function (data) {
+  chrome.storage.local.get(LINES, function (data) {
     let list = document.getElementById('list');
     let btnBoxmain = document.getElementById('btn__box');
     notes = data[LINES];

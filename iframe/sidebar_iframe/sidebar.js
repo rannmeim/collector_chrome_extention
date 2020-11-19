@@ -2,9 +2,9 @@ $('#btn_download').click(() => {
     console.log('download')
     // todo 组织成markdown的形式
     let text = '';
-    notes = NoteHandlers.getNotes();
+    notes = NoteHandler.getNotes();
     notes.forEach(note => {
-        text += NoteHandlers.parseToMarkdown(note.type, note.text) + '\n\n'
+        text += NoteHandler.parseToMarkdown(note.type, note.text) + '\n\n'
     })
     console.log('text', text)
 
@@ -21,9 +21,9 @@ $('#btn_copy').click(() => {
     console.log('copy')
     let textarea = document.createElement('textarea');
     let text = '';
-    notes = NoteHandlers.getNotes();
+    notes = NoteHandler.getNotes();
     notes.forEach(note => {
-        text += NoteHandlers.parseToMarkdown(note.type, note.text) + '\n\n'
+        text += NoteHandler.parseToMarkdown(note.type, note.text) + '\n\n'
     })
     console.log('text', text)
     textarea.value = text;
@@ -35,7 +35,7 @@ $('#btn_copy').click(() => {
 })
 $('#btn_clear').click(() => {
     console.log('clear')
-    NoteHandlers.clear();
+    NoteHandler.clear();
     geneList([]);
     // 通知更新popover
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -83,6 +83,6 @@ function geneList(notes) {
 // fixit 其他页面更新notes后 刷新notes
 
 async function init() {
-    geneList(await NoteHandlers.init());
+    geneList(await NoteHandler.init());
 }
 init()

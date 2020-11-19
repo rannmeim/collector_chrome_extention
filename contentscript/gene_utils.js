@@ -74,7 +74,7 @@ Popover.prototype.destroy = function () {
 }
 
 // 单例模式
-const PopoverUtils = {
+const PopoverHandler = {
     _baseLineRange: null,
     _offset: 10,
     _basePopover: null,
@@ -319,24 +319,26 @@ const PopoverUtils = {
         this._stopAdjustPosWhenScroll();
     },
     pressAgain() {
-        console.log('NoteHandlers.getNotes()')
-        console.log(NoteHandlers.getNotes())
-        if (!NoteHandlers.isEmpty()) {
-            ToastUtils.showToast({ type: 'again' });
+        console.log('NoteHandler.getNotes()')
+        console.log(NoteHandler.getNotes())
+        if (!NoteHandler.isEmpty()) {
+            ToastHandler.showToast({ type: 'again' });
             return { type: 'default' }
         } else {
-            ToastUtils.showToast({ type: 'empty' });
+            ToastHandler.showToast({ type: 'empty' });
             return { type: 'empty' }
         }
     },
-    _handleUndo() {
-        this.undoSave();
-        this.disposePopoverBox();
-    },
     _saveSelection(type) {
-        NoteHandlers.save({ text: this._selectionText, type });
-        this._highlightSelection();
-        this.disposePopoverBox();
+        NoteHandler.save({ text: this._selectionText, type })
+            .then(() => {
+                SidebarHandler.needUpdate();
+                this._highlightSelection();
+                this.disposePopoverBox();
+            }).catch(err => {
+                ToastHandler.showToast({ type: 'error', text: err });
+                this.disposePopoverBox();
+            });
     },
     _highlightSelection() {
         // todo
@@ -390,12 +392,12 @@ const PopoverUtils = {
     }
 }
 
-const ToastUtils = {
-    _texts: { 'again': '再按一次删除最后一条', 'undo': '已删除', 'empty': '还没有笔记，快去添加吧~', 'cleared': '列表已清空' },
+const ToastHandler = {
+    _texts: { 'again': '再按一次删除最后一条', 'undo': '已删除', 'empty': '还没有笔记，快去添加吧~', 'cleared': '列表已清空', 'error': '出错啦' },
     _$toast: null, // one toast at a time
     _geneToastEle(id, text) {
         let div = document.createElement('div');
-        div.id = id.toString();
+        div.id = `collector__toast--${id}`;
         div.className = 'toast toast-body my-toast'
         div.innerText = text
         document.body.appendChild(div)
@@ -405,8 +407,9 @@ const ToastUtils = {
         if (this._$toast) {
             this._$toast.toast('hide')
         }
+        console.log('show tooast', options)
         let id = options.type;
-        let toast = this._$toast = $(this._geneToastEle(id, this._texts[id]));
+        let toast = this._$toast = $(this._geneToastEle(id, options.text || this._texts[id]));
         this._$toast.toast({ delay: 2000 }).toast('show')
         this._$toast.on('hidden.bs.toast', () => {
             toast.remove();
@@ -416,7 +419,7 @@ const ToastUtils = {
     }
 }
 
-const SidebarUtils = {
+const SidebarHandler = {
     _$sidebar: null,
     _shown: false,
     _needUpdate: false,

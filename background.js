@@ -14,9 +14,9 @@ let undoTimeout = null;
 chrome.runtime.onInstalled.addListener(function () {
     console.log('oninstalled')
     // init storage
-    chrome.storage.sync.get(LINES, function (data) {
+    chrome.storage.local.get(LINES, function (data) {
         if (!Array.prototype.isPrototypeOf(data.lines)) {
-            chrome.storage.sync.set({ [LINES]: [] })
+            chrome.storage.local.set({ [LINES]: [] })
         }
     });
 
