@@ -2,12 +2,24 @@
     color: gray;
     border: 1px solid lightblue;
 } */
-.my-toast {
+.collector__toast {
     position: fixed;
     left: 50%;
     top: 100px;
     transform: translateX(-50%);
     z-index: 2147483647 !important;
+
+    max-width: 350px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.85);
+    background-clip: padding-box;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4.8px 14.4px 0px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-image: initial;
+    border-radius: 5px;
+    padding: 10px;
 }
 
 /* popover */

@@ -31,7 +31,7 @@ Popover.prototype.bindToBase = function () {
             this.popover.css({ 'top': `-${this.offset}px` });
             break;
         case 'bottom':
-            this.popover.css({ 'bottom': `-${this.offset}px` });
+            this.popover.css({ 'bottom': `-${this.offset}px`, 'transform': 'translate(-50%, 100%)' });
             break;
     }
     this.base.append(this.popover);
@@ -221,7 +221,7 @@ const PopoverHandler = {
         endRect = endRange.getBoundingClientRect()
 
         // culculate direction: forward or not 
-        forward = Math.abs((mouseupPosition.x + mouseupPosition.y) - (startRect.x + startRect.y)) > Math.abs((mouseupPosition.x + mouseupPosition.y) - (endRect.right + endRect.top))
+        forward = Math.abs((mouseupPosition.x + mouseupPosition.y) - (startRect.x + startRect.y)) > Math.abs((mouseupPosition.x + mouseupPosition.y) - (endRect.right + endRect.bottom))
         this._placement = forward ? 'bottom' : 'top';
         this._baseLineRange = forward ? endRange : startRange;
 
@@ -397,7 +397,7 @@ const ToastHandler = {
     _geneToastEle(id, text) {
         let div = document.createElement('div');
         div.id = `collector__toast--${id}`;
-        div.className = 'toast toast-body my-toast'
+        div.className = 'toast toast-body collector__toast'
         div.innerText = text
         document.body.appendChild(div)
         return div
