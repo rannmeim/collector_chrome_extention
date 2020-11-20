@@ -55,6 +55,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             SidebarHandler.toggleSidebar();
             sendResponse({ response: "got it" });
             break;
+        case 'SAVE':
+            NoteHandler.save();
+            sendResponse({ response: "got it" });
+            break;
         default:
             sendResponse({response: 'undefined action'})
     }

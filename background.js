@@ -3,10 +3,7 @@
 console.log('This is bg.js！！');
 
 const menus = {
-    // 'google': '谷歌搜索',
-    'baidu': '百度搜索',
-    // 'segmentsefault': '思否搜索',
-    // 'google_tran': '谷歌翻译'
+    'save': 'Save by Collector',
 }
 let undoTimeout = null;
 
@@ -18,7 +15,8 @@ chrome.runtime.onInstalled.addListener(function () {
     for (let key in menus) {
         chrome.contextMenus.create({
             id: key,
-            title: `${menus[key]}：%s`, // %s表示选中的文字
+            title: menus[key], // %s表示选中的文字
+            // title: `${menus[key]}：%s`, // %s表示选中的文字
             contexts: ['selection'], // 只有当选中文字时才会出现此右键菜单
         });
     }
@@ -31,17 +29,19 @@ chrome.runtime.onInstalled.addListener(function () {
     // });
     chrome.contextMenus.onClicked.addListener(function (params) {
         console.log('params:', params, params.menuItemId)
-        chrome.tabs.create({ url: 'https://www.baidu.com/s?ie=utf-8&wd=' + encodeURI(params.selectionText) });
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'SAVE' }, function (response) {
+                console.log(response);
+            });
+        });
     });
 
 
 });
 
 chrome.browserAction.onClicked.addListener(function (tab) {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SIDEBAR' }, function (response) {
-            console.log(response);
-        });
+    chrome.tabs.sendMessage(tab, { type: 'SHOW_SIDEBAR' }, function (response) {
+        console.log(response);
     });
 });
 

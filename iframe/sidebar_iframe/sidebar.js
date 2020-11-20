@@ -12,7 +12,7 @@ $('#btn_download').click(async () => {
 
     const blobUrl = window.URL.createObjectURL(blob)
     const a = document.createElement('a');
-    a.setAttribute('download', 'collector_notes.md');
+    a.setAttribute('download', notes[0] ? notes[0].text.substr(0, 10) + '.md': 'collector_notes.md');
     a.setAttribute('href', blobUrl);
     a.click();
     a.remove();

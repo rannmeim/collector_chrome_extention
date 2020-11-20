@@ -82,15 +82,18 @@ const NoteHandler = {
             note = note.split(/\n/).filter(line => line && line.trim());
             switch (type) {
                 case 'u-list':
-                    return note.map(item => `- ${item}`).join('\n')
+                    return note.map(item => `- ${item.trim()}`).join('\n')
                 case 'o-list':
-                    return note.map((item, index) => `${index + 1}. ${item}`).join('\n')
+                    return note.map((item, index) => `${index + 1}. ${item.trim()}`).join('\n')
                 case 'quote':
                     return '> ' + note.join('\n')
             }
         }
     },
     async save(content) {
+        if (!content) {
+            content = {type: 'text', text: document.getSelection().toString()}
+        }
         let notes = await this.getNotes();
         notes.push(content);
         chrome.storage.local.set({ [LINES]: notes }, () => {
