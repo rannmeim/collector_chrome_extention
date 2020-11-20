@@ -44,20 +44,34 @@ $('#btn_clear').click(() => {
         });
     });
 })
+function isMac() {
+    return /macintosh|mac os x/i.test(navigator.userAgent);
+}
+function geneEmptyText() {
+    let isMacOS = isMac();
+    let $guideList = $('#guide');
+    let items = [
+        'Select a piece of text to collect your note',
+        `press ${isMacOS ? '⌘' : 'Ctrl'}+U to open/close note list`,
+        `press ${isMacOS ? '⌘+⇧' : 'Ctrl + Shift'}+Z to undo the last note`,
+    ]
+    items.forEach(text => {
+        let item = $('<li></li>');
+        item.addClass('guide-item');
+        item.text(text);
+        $guideList.append(item)
+    })
+}
 function geneList(notes) {
-    // let notes = [{
-    //     type: 'h1',
-    //     text: 'hello'
-    // }] // dev
     let list = $('#list');
     list.html('');
+
+
     console.log(notes)
     if (!notes.length) {
-        let p = $('<p></p>');
-        p.addClass('hint');
-        p.text('let\'s collect your first note!');
-        list.append(p)
+        $('.empty-text').css('display', 'block');
     } else {
+        $('.empty-text').css('display', 'none');
         notes.forEach(line => {
             // console.log('line', line)
             let li = $('<li></li>');
@@ -80,9 +94,9 @@ function geneList(notes) {
     // 滚动到最下方
     $('#list-box').scrollTop(list.height() - $('#list-box').height())
 }
-// fixit 其他页面更新notes后 刷新notes
 
 async function init() {
+    geneEmptyText();
     geneList(await NoteHandler.init());
 }
 init()

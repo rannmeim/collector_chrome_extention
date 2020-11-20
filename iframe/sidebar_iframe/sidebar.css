@@ -12,6 +12,16 @@ h1 {
   padding: 0 10px;
 }
 
+.empty-text {
+  display: none;
+}
+.guide {
+  color: #999AAA;
+  padding-left: 34px;
+}
+.guide-item{
+  /* list-style-type:none; */
+}
 .hint {
   padding: 10px;
 }
