@@ -1,7 +1,5 @@
 let mouseMoved = false;
 
-NoteHandler.init();
-
 document.addEventListener('click', function (e) {
     console.log('page click')
     if (!mouseMoved) {
@@ -32,22 +30,24 @@ document.addEventListener('dblclick', function (e) {
 }, false);
 
 
-chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
-    console.log(sender.tab ?
-      "from a content script:" + sender.tab.url :
-        "from the extension");
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    // console.log(sender.tab ?
+    //   "from a content script:" + sender.tab.url :
+    //     "from the extension");
     switch (request.type) {
-        case 'PRESS_AGAIN_TO_UNDO':
-            let data = PopoverHandler.pressAgain()
-            sendResponse({ type: data.type });
+        case 'PRESS_AGAIN':
+            ToastHandler.showToast({ type: 'again' });
+            sendResponse({ response: "got it" });
+            break;
+        case 'EMPTY':
+            ToastHandler.showToast({ type: 'empty' });
+            sendResponse({ response: "got it" });
             break;
         case 'UNDO':
-            NoteHandler.undoSave();
             ToastHandler.showToast({ type: 'undo' });
             sendResponse({ response: "got it" });
             break;
         case 'CLEARED':
-            NoteHandler.init();
             ToastHandler.showToast({ type: 'cleared' });
             sendResponse({ response: "got it" });
             break;

@@ -20,7 +20,7 @@
   "permissions": ["activeTab", "storage", "contextMenus"],
   "manifest_version": 2,
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["contentscript/note_handlers.js", "background.js"],
     "persistent": false
   },
   "content_scripts":[{

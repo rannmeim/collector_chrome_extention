@@ -20,6 +20,9 @@
     border-image: initial;
     border-radius: 5px;
     padding: 10px;
+    border-radius: 12px;
+    padding: 8px;
+    font-size: 15px;
 }
 
 /* popover */

@@ -2,7 +2,6 @@
 
 console.log('This is bg.js！！');
 
-const LINES = 'collector-lines';
 const menus = {
     // 'google': '谷歌搜索',
     'baidu': '百度搜索',
@@ -14,11 +13,7 @@ let undoTimeout = null;
 chrome.runtime.onInstalled.addListener(function () {
     console.log('oninstalled')
     // init storage
-    chrome.storage.local.get(LINES, function (data) {
-        if (!Array.prototype.isPrototypeOf(data.lines)) {
-            chrome.storage.local.set({ [LINES]: [] })
-        }
-    });
+    NoteHandler.setDefault();
 
     for (let key in menus) {
         chrome.contextMenus.create({
@@ -43,48 +38,59 @@ chrome.runtime.onInstalled.addListener(function () {
 });
 
 chrome.browserAction.onClicked.addListener(function (tab) {
-    // alert('icon clicked')
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(tabs[0].id, { type: 'SHOW_SIDEBAR' }, function (response) {
-            // if (response) {
-                console.log('PRESS_AGAIN_TO_UNDO response', response);
-                if (response.type !== 'empty') {
-                    undoTimeout = setTimeout(() => {
-                        if (undoTimeout) {
-                            undoTimeout = null;
-                        }
-                    }, 1000)
-                }
-            // }
+            console.log(response);
         });
     });
 });
 
-chrome.commands.onCommand.addListener(function (command) {
+chrome.commands.onCommand.addListener(async function (command) {
     if (command === 'undo_last_one') {
         // 防抖
+        let type = '';
         if (undoTimeout) {
-            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, { type: 'UNDO' }, function (response) {
-                    console.log(response);
-                });
-            });
+            // 删除最后一条
+            console.log('call undo')
+            NoteHandler.undoSave();
+            // 让当前Active tab显示Toast
+            type = 'UNDO';
+            console.log('clear timeout')
             clearTimeout(undoTimeout);
             undoTimeout = null;
         } else {
-            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, { type: 'PRESS_AGAIN_TO_UNDO' }, function (response) {
-                    console.log('PRESS_AGAIN_TO_UNDO response', response);
-                    if (response.type !== 'empty') {
-                        // !< setTimeout是Task >!
-                        undoTimeout = setTimeout(() => {
-                            if (undoTimeout) {
-                                undoTimeout = null;
-                            }
-                        }, 1000)
+            if (!await NoteHandler.isEmpty()) {
+                type = 'PRESS_AGAIN';
+                // !< setTimeout是Task >!
+                undoTimeout = setTimeout(() => {
+                    if (undoTimeout) {
+                        undoTimeout = null;
                     }
-                });
-            });
+                }, 1000)
+            } else {
+                type = 'EMPTY';
+            }
         }
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { type }, function (response) {
+                console.log(response);
+            });
+        });
     }
 });
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    // console.log(sender.tab ?
+    //   "from a content script:" + sender.tab.url :
+    //     "from the extension");
+    if (request) {
+        switch (request.type) {
+            case 'UPDATE':
+                NoteHandler.init();
+                sendResponse({ response: "bg got it" });
+                break;
+            default:
+                sendResponse({ response: 'undefined action' })
+        }
+    }
+})

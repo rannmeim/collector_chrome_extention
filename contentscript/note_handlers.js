@@ -15,7 +15,20 @@ const text2Md = {
 
 const NoteHandler = {
     _notes: [],
+    _useCache: false,
+    ifUseCache() {
+        return this._useCache
+    },
+    setDefault(lines = []) {
+        chrome.storage.local.get(LINES, (data) => {
+            if (!Array.prototype.isPrototypeOf(data.lines)) {
+                chrome.storage.local.set({ [LINES]: lines })
+                if (this._useCache) this._notes = lines;
+            }
+        });    
+    },
     init() {
+        this._useCache = true;
         return new Promise((resolve, reject) => {
             // !< 非箭头函数时，this指向window >!
             chrome.storage.local.get(LINES, (data) => {
@@ -25,27 +38,41 @@ const NoteHandler = {
         })
     },
     getNotes() {
-        return [...this._notes]
+        return new Promise((resolve, reject) => {
+            if (this._useCache) {
+                resolve([...this._notes])
+            } else {
+                chrome.storage.local.get(LINES, (data) => {
+                    resolve([...data[LINES]])
+                })
+            }
+        })
     },
     isEmpty() {
-        return !this._notes.length
-    },
-    undoSave() {
         return new Promise((resolve, reject) => {
-            let notes = [];
-            if (!this.isEmpty()) {
-                notes = this._notes.slice(0, this._notes.length - 1);
+            if (this._useCache) {
+                resolve(!this._notes.length)
+            } else {
+                chrome.storage.local.get(LINES, (data) => {
+                    resolve( !data[LINES] || !data[LINES].length)
+                })
             }
-            chrome.storage.local.set({ [LINES]: notes }, function () {
+        })
+    },
+    async undoSave() {
+        if (!await this.isEmpty()) {
+            let notes = await this.getNotes();
+            notes.pop();
+            chrome.storage.local.set({ [LINES]: notes }, () => {
                 if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError.message);
+                    throw new Error(chrome.runtime.lastError.message)
                 } else {
                     console.log('deleted!')
-                    this._notes = [...notes];
-                    resolve();
+                    if (this._useCache)
+                        this._notes = [...notes];
                 }
             })
-        })
+        }
     },
     parseToMarkdown(type, note) {
         let fixs = text2Md[type];
@@ -63,32 +90,29 @@ const NoteHandler = {
             }
         }
     },
-    save(content) {
-        return new Promise((resolve, reject) => {
-            // 此时document.getSelection.toString()为空
-            let notes = [];
-            notes = [...this._notes, content];
-            chrome.storage.local.set({ [LINES]: notes }, () => {
-                // !< 无法用try catch 因为是在异步操作中抛出错 >!
-                if (chrome.runtime.lastError) { // !< lastError 处理后会自动清除 >!
-                    console.log(chrome.runtime.lastError.message)
-                    reject('空间不够了呢~清理一下嘛~记得保存之前的笔记哦~');
-                } else {
+    async save(content) {
+        let notes = await this.getNotes();
+        notes.push(content);
+        chrome.storage.local.set({ [LINES]: notes }, () => {
+            // !< 无法用try catch 因为是在异步操作中抛出错 >!
+            if (chrome.runtime.lastError) { // !< lastError 处理后会自动清除 >!
+                throw new Error('空间不够了呢，该清理啦~记得保存之前的笔记哦~')
+            } else {
+                if (this._useCache)
                     this._notes = [...notes];
-                    resolve();
-                }
-            })
+            }
         })
     },
     clear() {
-        chrome.storage.local.set({ [LINES]: [] }, () => {
-            if (chrome.runtime.lastError) {
-                console.log(chrome.runtime.lastError.message)
-                reject(chrome.runtime.lastError.message);
-            } else {
-                this._notes = [];
-                resolve();
-            }
-        });
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.set({ [LINES]: [] }, () => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    this._notes = [];
+                    resolve();
+                }
+            });
+        })
     },
 }

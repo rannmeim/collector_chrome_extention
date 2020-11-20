@@ -317,25 +317,17 @@ const PopoverHandler = {
         this._baseLineRange = null;
         this._stopAdjustPosWhenScroll();
     },
-    pressAgain() {
-        console.log('NoteHandler.getNotes()')
-        console.log(NoteHandler.getNotes())
-        if (!NoteHandler.isEmpty()) {
-            ToastHandler.showToast({ type: 'again' });
-            return { type: 'default' }
-        } else {
-            ToastHandler.showToast({ type: 'empty' });
-            return { type: 'empty' }
-        }
-    },
     _saveSelection(type) {
         NoteHandler.save({ text: this._selectionText, type })
             .then(() => {
                 SidebarHandler.needUpdate();
                 this._highlightSelection();
                 this.disposePopoverBox();
+                chrome.runtime.sendMessage({ type: 'UPDATE' }, function (response) {
+                    console.log(response);
+                });
             }).catch(err => {
-                ToastHandler.showToast({ type: 'error', text: err });
+                ToastHandler.showToast({ type: 'error', text: err.message });
                 this.disposePopoverBox();
             });
     },
@@ -426,7 +418,7 @@ const SidebarHandler = {
         this._needUpdate = true;
     },
     _showSidebar() {
-        if (this._needUpdate) {
+        if (this._needUpdate && this._$sidebar) {
             console.log('recreate sidebar')
             this._destroySidebar();
         }

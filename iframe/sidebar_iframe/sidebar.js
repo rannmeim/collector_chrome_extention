@@ -1,8 +1,8 @@
-$('#btn_download').click(() => {
+$('#btn_download').click(async () => {
     console.log('download')
     // todo 组织成markdown的形式
     let text = '';
-    notes = NoteHandler.getNotes();
+    let notes = await NoteHandler.getNotes();
     notes.forEach(note => {
         text += NoteHandler.parseToMarkdown(note.type, note.text) + '\n\n'
     })
@@ -17,11 +17,11 @@ $('#btn_download').click(() => {
     a.click();
     a.remove();
 })
-$('#btn_copy').click(() => {
+$('#btn_copy').click(async () => {
     console.log('copy')
     let textarea = document.createElement('textarea');
     let text = '';
-    notes = NoteHandler.getNotes();
+    let notes = await NoteHandler.getNotes();
     notes.forEach(note => {
         text += NoteHandler.parseToMarkdown(note.type, note.text) + '\n\n'
     })
@@ -40,8 +40,11 @@ $('#btn_clear').click(() => {
     // 通知更新popover
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(tabs[0].id, { type: 'CLEARED' }, function (response) {
-            console.log('CLEARED response', response);
+            console.log(response);
         });
+    });
+    chrome.runtime.sendMessage({ type: 'UPDATE' }, function (response) {
+        console.log(response);
     });
 })
 function isMac() {
@@ -66,8 +69,6 @@ function geneList(notes) {
     let list = $('#list');
     list.html('');
 
-
-    console.log(notes)
     if (!notes.length) {
         $('.empty-text').css('display', 'block');
     } else {
