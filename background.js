@@ -1,15 +1,20 @@
 'use strict';
 
 console.log('This is bg.js！！');
-
+const SWITCH = 'switch'
 const menus = {
     'save': 'Save by Collector',
+    'switch': 'Turn off Collector',
 }
 let undoTimeout = null;
 
 chrome.runtime.onInstalled.addListener(function () {
     console.log('oninstalled')
-    // init storage
+
+    // init switch
+    chrome.storage.local.set({ [SWITCH]: true })
+
+    // init notes
     NoteHandler.setDefault();
 
     for (let key in menus) {
@@ -29,11 +34,25 @@ chrome.runtime.onInstalled.addListener(function () {
     // });
     chrome.contextMenus.onClicked.addListener(function (params) {
         console.log('params:', params, params.menuItemId)
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'SAVE' }, function (response) {
-                console.log(response);
-            });
-        });
+        switch (params.menuItemId) {
+            case 'save':
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, { type: 'SAVE' }, function (response) {
+                        console.log(response);
+                    });
+                });
+                break;
+            case 'switch':
+                chrome.storage.local.get([SWITCH], data => {
+                    chrome.contextMenus.update({
+                        id: 'switch',
+                        title: data[SWITCH] ? 'Turn on Collector' : 'Turn off Collector', // %s表示选中的文字
+                        contexts: ['selection'], // 只有当选中文字时才会出现此右键菜单
+                    });
+                    chrome.storage.local.set({ [SWITCH]: !data[SWITCH] })
+                })
+                break;
+        }
     });
 
 
