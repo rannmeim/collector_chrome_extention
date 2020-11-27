@@ -59,9 +59,9 @@ chrome.runtime.onInstalled.addListener(function () {
 });
 
 chrome.browserAction.onClicked.addListener(function (tab) {
-    chrome.tabs.sendMessage(tab, { type: 'SHOW_SIDEBAR' }, function (response) {
+    chrome.tabs.sendMessage(tab.id, { type: 'SHOW_SIDEBAR' }, function (response) {
         console.log(response);
-    });
+    })
 });
 
 chrome.commands.onCommand.addListener(async function (command) {

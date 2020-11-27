@@ -31,9 +31,6 @@ document.addEventListener('dblclick', function (e) {
 
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    // console.log(sender.tab ?
-    //   "from a content script:" + sender.tab.url :
-    //     "from the extension");
     switch (request.type) {
         case 'PRESS_AGAIN':
             ToastHandler.showToast({ type: 'again' });
