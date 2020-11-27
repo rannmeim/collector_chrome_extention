@@ -352,6 +352,19 @@ const PopoverHandler = {
         }
         this.disposePopoverBox();
     },
+    _getGoogleTranslateContent(options) {
+        let giframe = $('<iframe></iframe>')
+        let {tl, sl, text} = options
+        let url = `https://translate.google.cn/#view=home&op=translate&tl=${tl}&sl=${sl}&text=${encodeURI(text)}`
+        giframe.attr('src', url)
+        giframe.attr('id', 'collector__googletranslate__iframe')
+        $('body').append(giframe)
+        // giframe.css('display', 'none')
+        document.getElementsByClassName
+        let trans = giframe[0].contentWindow.document.getElementsByClassName('translation')[0]
+        console.log(trans)
+        console.log(trans.innerText)
+    },
     _translate(text) {
         let tl = 'zh-CN';
         let sl = 'en'
@@ -359,6 +372,7 @@ const PopoverHandler = {
             tl = 'en';
             sl = 'zh-CN'
         }
+        // this._getGoogleTranslateContent({text, tl, sl})
         window.open(`https://translate.google.cn/#view=home&op=translate&tl=${tl}&sl=${sl}&text=${encodeURI(text)}`, '_blank');
     },
     _setPopoverPosition() {
